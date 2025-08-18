@@ -311,25 +311,25 @@ function goBack() {
                 <div class="space-y-3">
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Subtotal ({{ itemCount }} items)</span>
-                    <span>${{ subtotal.toFixed(2) }}</span>
+                    <span>${{ subtotal  }}</span>
                   </div>
                   <div v-if="totalSavings > 0" class="flex justify-between text-green-600">
                     <span>Total Savings</span>
-                    <span>-${{ totalSavings.toFixed(2) }}</span>
+                    <span>-${{ totalSavings  }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Shipping</span>
                     <span v-if="shipping === 0" class="text-green-600">Free</span>
-                    <span v-else>${{ shipping.toFixed(2) }}</span>
+                    <span v-else>${{ shipping  }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Tax</span>
-                    <span>${{ tax.toFixed(2) }}</span>
+                    <span>${{ tax  }}</span>
                   </div>
                   <div class="border-t pt-3">
                     <div class="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>${{ total.toFixed(2) }}</span>
+                      <span>${{ total  }}</span>
                     </div>
                   </div>
                 </div>

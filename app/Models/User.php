@@ -66,12 +66,23 @@ class User extends Authenticatable
             'preferred_sports' => 'array',
         ];
     }
-    
+
     // Relationships
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function wishlistedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists');
+    }
+
     public function getImageAttribute($value){
         return $value ? asset('storage/' . $value) : asset('images/default-profile.png');
     }

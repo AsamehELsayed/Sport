@@ -52,22 +52,24 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function create(Order $order)
+    public function create($order_id)
     {
-        $order->load(['user', 'items']);
+        $order = Order::with(['user', 'items'])->findOrFail($order_id);
 
         return Inertia::render('admin/invoices/Create', [
             'order' => $order,
         ]);
     }
 
-    public function store(Request $request, Order $order)
+    public function store(Request $request, $order_id)
     {
         $request->validate([
             'due_date' => 'nullable|date|after:today',
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string',
         ]);
+
+        $order = Order::findOrFail($order_id);
 
         $invoice = Invoice::create([
             'order_id' => $order->id,

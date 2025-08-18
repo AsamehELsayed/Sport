@@ -38,7 +38,7 @@
                     <div class="w-16 h-16 rounded-lg overflow-hidden bg-muted">
                       <img
                         v-if="product.images && product.images.length > 0"
-                        :src="`/storage/${product.images[0]}`"
+                        :src="`${product.images[0]}`"
                         :alt="product.name"
                         class="w-full h-full object-cover"
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"

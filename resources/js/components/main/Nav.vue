@@ -3,19 +3,16 @@ import { ref, computed, onMounted } from "vue";
 import { Link, usePage, router } from "@inertiajs/vue3"; // For navigation with Inertia
 import { Zap, Search, ShoppingCart, User, Menu, Heart, LogOut, Settings } from "lucide-vue-next"; // install: npm i lucide-vue-next
 import { useCart } from "@/composables/useCart";
+import { useWishlist } from "@/composables/useWishlist";
 
 const isMenuOpen = ref(false);
 const { itemCount } = useCart();
+const { wishlistCount, getWishlistCount } = useWishlist();
 
 // Get auth user from Inertia page props
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const isAuthenticated = computed(() => !!user.value);
-
-// Close dropdown when clicking outside
-const closeDropdown = () => {
-  isMenuOpen.value = false;
-};
 
 // Close dropdown when clicking outside
 onMounted(() => {
@@ -25,6 +22,11 @@ onMounted(() => {
       isMenuOpen.value = false;
     }
   });
+
+  // Load wishlist count for authenticated users
+  if (isAuthenticated.value) {
+    getWishlistCount();
+  }
 });
 
 // Logout function
@@ -50,7 +52,9 @@ const logout = () => {
         <!-- Search Bar - Hidden on mobile -->
         <div class="hidden md:flex flex-1 max-w-lg mx-8">
           <div class="relative w-full">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <div class="absolute left-3 top-0 bottom-0 flex items-center">
+              <Search class="text-muted-foreground w-4 h-4" />
+            </div>
             <input
               type="text"
               placeholder="Search sports equipment..."
@@ -62,21 +66,27 @@ const logout = () => {
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-6">
           <Link href="/categories" class="text-foreground hover:text-primary">Categories</Link>
-          <Link href="#" class="text-foreground hover:text-primary">Brands</Link>
-          <Link href="#" class="text-foreground hover:text-primary">Sale</Link>
+          <Link href="/brands" class="text-foreground hover:text-primary">Brands</Link>
+          <Link href="/sales" class="text-foreground hover:text-primary">Sale</Link>
         </div>
 
         <!-- User Actions -->
         <div class="flex items-center space-x-4">
-          <button class="hidden md:flex p-2 hover:text-primary">
+          <Link  v-if="isAuthenticated" href="/wishlist" class="hidden md:flex relative p-2 hover:text-primary">
             <Heart class="w-5 h-5" />
-          </button>
+            <span
+              v-if="wishlistCount > 0"
+              class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full text-xs bg-red-500 text-white font-bold"
+            >
+              {{ wishlistCount }}
+            </span>
+          </Link>
 
           <Link href="/cart" class="relative p-2 hover:text-primary">
             <ShoppingCart class="w-5 h-5" />
             <span
               v-if="itemCount > 0"
-              class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full text-xs bg-primary text-white"
+              class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full text-xs bg-primary text-red-500 font-bold"
             >
               {{ itemCount }}
             </span>
@@ -153,7 +163,9 @@ const logout = () => {
       <div v-if="isMenuOpen" class="md:hidden py-4 border-t border-border">
         <div class="flex flex-col space-y-4">
           <div class="relative">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <div class="absolute left-3 top-0 bottom-0 flex items-center">
+              <Search class="text-muted-foreground w-4 h-4" />
+            </div>
             <input
               type="text"
               placeholder="Search sports equipment..."
@@ -161,10 +173,13 @@ const logout = () => {
             />
           </div>
           <Link href="/categories" class="text-foreground hover:text-primary text-left">Categories</Link>
-          <Link href="#" class="text-foreground hover:text-primary text-left">Brands</Link>
-          <Link href="#" class="text-foreground hover:text-primary text-left">Sale</Link>
-          <Link href="#" class="flex items-center text-foreground hover:text-primary">
+          <Link href="/brands" class="text-foreground hover:text-primary text-left">Brands</Link>
+          <Link href="/sales" class="text-foreground hover:text-primary text-left">Sale</Link>
+          <Link href="/wishlist" class="flex items-center text-foreground hover:text-primary">
             <Heart class="w-4 h-4 mr-2" /> Wishlist
+            <span v-if="wishlistCount > 0" class="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              {{ wishlistCount }}
+            </span>
           </Link>
           <Link href="/cart" class="flex items-center text-foreground hover:text-primary">
             <ShoppingCart class="w-4 h-4 mr-2" /> Cart ({{ itemCount }})

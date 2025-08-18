@@ -14,10 +14,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Orders
-    Route::resource('orders', OrderController::class);
-    Route::post('orders/bulk-update', [OrderController::class, 'bulkUpdate'])->name('orders.bulk-update');
     Route::get('orders/export', [OrderController::class, 'export'])->name('orders.export');
+    Route::post('orders/bulk-update', [OrderController::class, 'bulkUpdate'])->name('orders.bulk-update');
     Route::get('orders/{order}/generate-invoice', [OrderController::class, 'generateInvoice'])->name('orders.generate-invoice');
+    Route::resource('orders', OrderController::class);
 
     // Products
     Route::resource('products', ProductController::class);
@@ -33,7 +33,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
 
     // Invoices
-    Route::resource('invoices', InvoiceController::class);
+    Route::resource('invoices', InvoiceController::class)->except(['create']);
+    Route::get('invoices/create/{order_id}', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('invoices/{order_id}', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::post('invoices/bulk-update', [InvoiceController::class, 'bulkUpdate'])->name('invoices.bulk-update');
     Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'generatePdf'])->name('invoices.pdf');
     Route::get('invoices/{invoice}/preview', [InvoiceController::class, 'previewPdf'])->name('invoices.preview');

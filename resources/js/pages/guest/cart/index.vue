@@ -213,13 +213,13 @@ onMounted(() => {
                       <!-- Price -->
                       <div class="text-right ml-4">
                         <div class="flex items-center gap-2 mb-1">
-                          <span class="text-xl font-bold text-primary">${{ item.price.toFixed(2) }}</span>
+                          <span class="text-xl font-bold text-primary">${{ item.price  }}</span>
                           <span v-if="item.originalPrice" class="text-sm text-muted-foreground line-through">
-                            ${{ item.originalPrice.toFixed(2) }}
+                            ${{ item.originalPrice  }}
                           </span>
                         </div>
                         <div v-if="item.originalPrice" class="text-sm text-green-600 font-medium">
-                          Save ${{ ((item.originalPrice - item.price) * item.quantity).toFixed(2) }}
+                          Save ${{ ((item.originalPrice - item.price) * item.quantity)  }}
                         </div>
                       </div>
                     </div>
@@ -316,7 +316,7 @@ onMounted(() => {
                           </div>
                         </div>
                         <div class="text-right ml-4">
-                          <span class="text-xl font-bold text-primary">${{ item.price.toFixed(2) }}</span>
+                          <span class="text-xl font-bold text-primary">${{ item.price  }}</span>
                         </div>
                       </div>
                       <div class="flex items-center gap-2 mt-4">
@@ -358,32 +358,32 @@ onMounted(() => {
                 <div class="space-y-3">
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Subtotal ({{ itemCount }} items)</span>
-                    <span>${{ subtotal.toFixed(2) }}</span>
+                    <span>${{ subtotal  }}</span>
                   </div>
                   <div v-if="totalSavings > 0" class="flex justify-between text-green-600">
                     <span>Total Savings</span>
-                    <span>-${{ totalSavings.toFixed(2) }}</span>
+                    <span>-${{ totalSavings  }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Shipping</span>
                     <span v-if="shipping === 0" class="text-green-600">Free</span>
-                    <span v-else>${{ shipping.toFixed(2) }}</span>
+                    <span v-else>${{ shipping  }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Tax</span>
-                    <span>${{ tax.toFixed(2) }}</span>
+                    <span>${{ tax  }}</span>
                   </div>
                   <div class="border-t pt-3">
                     <div class="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>${{ total.toFixed(2) }}</span>
+                      <span>${{ total  }}</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Shipping info -->
                 <div v-if="shipping > 0" class="text-sm text-muted-foreground text-center p-3 bg-muted/50 rounded-lg">
-                  Add ${{ (100 - subtotal).toFixed(2) }} more for free shipping
+                  Add ${{ (100 - subtotal)  }} more for free shipping
                 </div>
 
                 <!-- Checkout button -->

@@ -40,7 +40,7 @@ const showAddedToCart = ref(false)
 // Computed properties
 const currentImage = computed(() => {
   if (props.product?.images && props.product.images.length > 0) {
-    return `/storage/${props.product.images[0]}`
+    return `${props.product.images[currentImageIndex.value]}`
   }
   return '/images/placeholder-product.svg'
 })
@@ -183,7 +183,7 @@ onMounted(() => {
                 @click="selectImage(i)"
               >
                 <img
-                  :src="`/storage/${img}`"
+                  :src="`${img}`"
                   :alt="`${product.name} view ${i + 1}`"
                   class="w-full h-full object-cover"
                   @error="handleImageError"
@@ -220,9 +220,9 @@ onMounted(() => {
 
             <!-- Price -->
             <div class="flex items-center gap-2">
-              <span class="text-3xl font-bold text-primary">${{ (product.final_price || product.price).toFixed(2) }}</span>
+              <span class="text-3xl font-bold text-primary">${{ (product.final_price || product.price) }}</span>
               <span v-if="product.discount > 0" class="text-lg text-muted-foreground line-through">
-                ${{ product.price.toFixed(2) }}
+                ${{ product.price }}
               </span>
             </div>
 
@@ -366,7 +366,7 @@ onMounted(() => {
               <Link :href="`/products/${relatedProduct.id}`">
                 <div class="aspect-square overflow-hidden">
                   <img
-                    :src="relatedProduct.main_image || '/images/placeholder-product.jpg'"
+                    :src="relatedProduct.images && relatedProduct.images.length > 0 ? `${relatedProduct.images[0]}` : '/images/placeholder-product.svg'"
                     :alt="relatedProduct.name"
                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     @error="handleImageError"

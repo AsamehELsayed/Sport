@@ -3,6 +3,7 @@
 use App\Http\Controllers\Customer\AuthController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -31,4 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::get('orders', [OrderController::class, 'index'])->name('customer.orders.index');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('customer.orders.show');
     Route::post('orders', [OrderController::class, 'store'])->name('customer.orders.store');
+
+    // Wishlist routes
+    Route::middleware('wishlist')->group(function () {
+        Route::get('wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
+        Route::post('wishlist', [WishlistController::class, 'store'])->name('customer.wishlist.store');
+        Route::delete('wishlist', [WishlistController::class, 'destroy'])->name('customer.wishlist.destroy');
+        Route::post('wishlist/toggle', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
+        Route::post('wishlist/check', [WishlistController::class, 'check'])->name('customer.wishlist.check');
+        Route::get('wishlist/count', [WishlistController::class, 'count'])->name('customer.wishlist.count');
+    });
 });

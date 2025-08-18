@@ -20,13 +20,13 @@
         <form @submit.prevent="applyFilters" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label class="block text-sm font-medium text-foreground mb-2">Search</label>
-            <Input 
-              v-model="filters.search" 
+            <Input
+              v-model="filters.search"
               placeholder="Order #, customer name, email..."
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-foreground mb-2">Status</label>
             <select v-model="filters.status" class="w-full px-3 py-2 border border-border rounded-md bg-background">
@@ -38,25 +38,25 @@
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-foreground mb-2">Date From</label>
-            <Input 
-              v-model="filters.date_from" 
+            <Input
+              v-model="filters.date_from"
               type="date"
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-foreground mb-2">Date To</label>
-            <Input 
-              v-model="filters.date_to" 
+            <Input
+              v-model="filters.date_to"
               type="date"
               class="w-full"
             />
           </div>
-          
+
           <div class="md:col-span-2 lg:col-span-4 flex items-center space-x-2">
             <Button type="submit" class="flex-1">
               <Search class="w-4 h-4 mr-2" />
@@ -100,8 +100,8 @@
             <thead>
               <tr class="border-b border-border bg-muted/50">
                 <th class="text-left py-3 px-4 font-medium text-muted-foreground">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :checked="allSelected"
                     @change="toggleSelectAll"
                     class="rounded border-border"
@@ -117,14 +117,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr 
-                v-for="order in orders?.data || []" 
-                :key="order.id" 
+              <tr
+                v-for="order in orders?.data || []"
+                :key="order.id"
                 class="border-b border-border hover:bg-muted/50"
               >
                 <td class="py-3 px-4">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :value="order.id"
                     v-model="selectedOrders"
                     class="rounded border-border"
@@ -150,20 +150,20 @@
                   </Badge>
                 </td>
                 <td class="py-3 px-4 font-medium">
-                  {{ order.total ? '$' + parseFloat(order.total).toFixed(2) : '$0.00' }}
+                  {{ order.total ? '$' + parseFloat(order.total) : '$0.00' }}
                 </td>
                 <td class="py-3 px-4 text-sm text-muted-foreground">
                   {{ formatDate(order.created_at) }}
                 </td>
                 <td class="py-3 px-4">
                   <div class="flex items-center space-x-2">
-                    <Link 
+                    <Link
                       :href="`/admin/orders/${order.id}`"
                       class="text-sm text-primary hover:underline"
                     >
                       View
                     </Link>
-                    <Link 
+                    <Link
                       :href="`/admin/orders/${order.id}/edit`"
                       class="text-sm text-primary hover:underline"
                     >
@@ -185,19 +185,19 @@
       </p>
       <div class="flex items-center space-x-2">
         <template v-for="link in orders.links" :key="link.label">
-          <Link 
-            v-if="link.url" 
+          <Link
+            v-if="link.url"
             :href="link.url"
             :class="[
               'px-3 py-2 text-sm rounded-md',
-              link.active 
-                ? 'bg-primary text-primary-foreground' 
+              link.active
+                ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             ]"
             v-html="link.label"
           />
-          <span 
-            v-else 
+          <span
+            v-else
             class="px-3 py-2 text-sm rounded-md text-muted-foreground opacity-50 cursor-not-allowed"
             v-html="link.label"
           />

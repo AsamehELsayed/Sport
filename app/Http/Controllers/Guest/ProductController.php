@@ -134,9 +134,7 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product->load(['category', 'brand', 'variants' => function ($query) {
-            $query->where('is_active', true);
-        }]);
+        $product->load(['category', 'brand', 'variants']);
 
         // Get related products
         $relatedProducts = Product::with(['category', 'brand'])
@@ -163,7 +161,7 @@ class ProductController extends Controller
             return redirect()->route('categories.index');
         }
 
-        $products = Product::with(['category', 'brand'])
+        $products = Product::with(['category', 'brand', 'variants'])
             ->where('is_active', true)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', '%' . $query . '%')

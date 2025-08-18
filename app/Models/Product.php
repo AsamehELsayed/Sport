@@ -52,9 +52,24 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('is_active', true)->where('stock', '>', 0);
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function wishlistedBy()
+    {
+        return $this->belongsToMany(User::class, 'wishlists');
     }
 
     // Helper methods for total stock

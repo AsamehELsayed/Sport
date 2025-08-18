@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'RequireAuth' => \App\Http\Middleware\RequireAuth::class,
+            'wishlist' => \App\Http\Middleware\WishlistMiddleware::class,
+            'require.auth' => \App\Http\Middleware\RequireAuth::class,
         ]);
 
         $middleware->web(append: [

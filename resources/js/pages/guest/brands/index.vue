@@ -5,8 +5,7 @@ import ProductCard from "@/components/main/ProductCard.vue";
 import Button from "@/components/ui/Button.vue";
 import BaseBadge from "@/components/ui/BaseBadge.vue";
 import CartNotification from "@/components/main/CartNotification.vue";
-import AddToCartModal from "@/components/main/AddToCartModal.vue";
-import { Filter, Grid, List, Star, Zap, Search, X } from "lucide-vue-next";
+import { Filter, Grid, List, Star, Zap, Search, X, Award } from "lucide-vue-next";
 import GuestLayout from '@/layouts/GuestLayout.vue';
 
 defineOptions({
@@ -15,19 +14,23 @@ defineOptions({
 
 // Props from Inertia
 const props = defineProps({
-  category: {
+  brand: {
     type: String,
-    default: 'All Categories'
+    default: 'All Brands'
+  },
+  brandData: {
+    type: Object,
+    default: null
   },
   products: {
     type: Object,
     default: () => ({ data: [] })
   },
-  categories: {
+  brands: {
     type: Array,
     default: () => []
   },
-  brands: {
+  categories: {
     type: Array,
     default: () => []
   },
@@ -45,7 +48,7 @@ const props = defineProps({
 const viewMode = ref('grid'); // 'grid' or 'list'
 const showFilters = ref(false);
 const searchInput = ref(props.searchQuery || '');
-const selectedBrands = ref(props.filters.brand ? props.filters.brand.split(',') : []);
+const selectedCategories = ref(props.filters.category ? props.filters.category.split(',') : []);
 const selectedPriceRange = ref([
   props.filters.min_price ? parseInt(props.filters.min_price) : 0,
   props.filters.max_price ? parseInt(props.filters.max_price) : 500
@@ -57,10 +60,6 @@ const showNotification = ref(false);
 const notificationMessage = ref('');
 const notificationType = ref<'success' | 'error' | 'info'>('success');
 
-// Modal state
-const showAddToCartModal = ref(false);
-const selectedProduct = ref(null);
-
 // Computed sorted products (server-side sorting is handled by backend)
 const sortedProducts = computed(() => {
   return props.products.data || [];
@@ -69,7 +68,7 @@ const sortedProducts = computed(() => {
 // Computed for active filters count
 const activeFiltersCount = computed(() => {
   let count = 0;
-  if (selectedBrands.value.length > 0) count++;
+  if (selectedCategories.value.length > 0) count++;
   if (selectedPriceRange.value[0] > 0 || selectedPriceRange.value[1] < 500) count++;
   if (sortBy.value !== 'featured') count++;
   if (searchInput.value) count++;
@@ -77,17 +76,17 @@ const activeFiltersCount = computed(() => {
 });
 
 // Methods
-const toggleBrand = (brandSlug: string) => {
-  const index = selectedBrands.value.indexOf(brandSlug);
+const toggleCategory = (categorySlug: string) => {
+  const index = selectedCategories.value.indexOf(categorySlug);
   if (index > -1) {
-    selectedBrands.value.splice(index, 1);
+    selectedCategories.value.splice(index, 1);
   } else {
-    selectedBrands.value.push(brandSlug);
+    selectedCategories.value.push(categorySlug);
   };
 };
 
 const clearFilters = () => {
-  selectedBrands.value = [];
+  selectedCategories.value = [];
   selectedPriceRange.value = [0, 500];
   sortBy.value = 'featured';
   searchInput.value = '';
@@ -106,8 +105,8 @@ const handleSearch = () => {
   }
 
   // Preserve other filters
-  if (selectedBrands.value.length > 0) {
-    params.set('brand', selectedBrands.value.join(','));
+  if (selectedCategories.value.length > 0) {
+    params.set('category', selectedCategories.value.join(','));
   }
   if (sortBy.value !== 'featured') {
     params.set('sort', sortBy.value);
@@ -138,16 +137,16 @@ const clearSearch = () => {
 };
 
 // Watch for filter changes
-watch([selectedBrands, sortBy], () => {
+watch([selectedCategories, sortBy], () => {
   // Debounce the filter changes to avoid too many requests
   clearTimeout(window.filterTimeout);
   window.filterTimeout = setTimeout(() => {
     const params = new URLSearchParams(window.location.search);
 
-    if (selectedBrands.value.length > 0) {
-      params.set('brand', selectedBrands.value.join(','));
+    if (selectedCategories.value.length > 0) {
+      params.set('category', selectedCategories.value.join(','));
     } else {
-      params.delete('brand');
+      params.delete('category');
     }
 
     if (sortBy.value !== 'featured') {
@@ -211,8 +210,8 @@ watch(selectedPriceRange, (newRange) => {
     }
 
     // Add other current filters
-    if (selectedBrands.value.length > 0) {
-      params.set('brand', selectedBrands.value.join(','));
+    if (selectedCategories.value.length > 0) {
+      params.set('category', selectedCategories.value.join(','));
     }
     if (sortBy.value !== 'featured') {
       params.set('sort', sortBy.value);
@@ -237,23 +236,6 @@ const handleAddToCart = (product: any) => {
 
   // Show success notification
   notificationMessage.value = `${product.name} added to cart!`;
-  notificationType.value = 'success';
-  showNotification.value = true;
-};
-
-const handleOpenAddToCartModal = (product: any) => {
-  selectedProduct.value = product;
-  showAddToCartModal.value = true;
-};
-
-const handleCloseAddToCartModal = () => {
-  showAddToCartModal.value = false;
-  selectedProduct.value = null;
-};
-
-const handleAddToCartSuccess = (item: any) => {
-  // Show success notification
-  notificationMessage.value = `${item.name} added to cart!`;
   notificationType.value = 'success';
   showNotification.value = true;
 };
@@ -291,22 +273,51 @@ onMounted(() => {
             Home
           </Link>
           <span class="text-muted-foreground">/</span>
-          <span class="text-foreground font-medium">Categories</span>
-          <span v-if="category !== 'All Categories'" class="text-muted-foreground">/</span>
-          <span v-if="category !== 'All Categories'" class="text-foreground font-medium">
-            {{ category }}
+          <span class="text-foreground font-medium">Brands</span>
+          <span v-if="brand !== 'All Brands'" class="text-muted-foreground">/</span>
+          <span v-if="brand !== 'All Brands'" class="text-foreground font-medium">
+            {{ brand }}
           </span>
         </div>
 
-        <h1 class="text-4xl font-bold mb-2">
-          <span class="text-foreground">{{ category }}</span>
-          <span v-if="searchQuery" class="text-2xl font-normal text-muted-foreground ml-2">
-            for "{{ searchQuery }}"
-          </span>
-        </h1>
-        <p class="text-muted-foreground text-lg">
-          Discover the best sports equipment for your needs
-        </p>
+        <!-- Brand Header -->
+        <div v-if="brandData" class="mb-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div v-if="brandData.logo" class="w-16 h-16 rounded-lg overflow-hidden bg-white p-2">
+              <img :src="brandData.logo" :alt="brandData.name" class="w-full h-full object-contain" />
+            </div>
+            <div>
+              <h1 class="text-4xl font-bold mb-2">{{ brandData.name }}</h1>
+              <p v-if="brandData.description" class="text-muted-foreground text-lg max-w-2xl">
+                {{ brandData.description }}
+              </p>
+            </div>
+          </div>
+          <div v-if="brandData.website" class="flex items-center gap-2">
+            <Link
+              :href="brandData.website"
+              target="_blank"
+              class="text-primary hover:underline flex items-center gap-2"
+            >
+              Visit Official Website
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+            </Link>
+          </div>
+        </div>
+
+        <div v-else>
+          <h1 class="text-4xl font-bold mb-2">
+            <span class="text-foreground">{{ brand }}</span>
+            <span v-if="searchQuery" class="text-2xl font-normal text-muted-foreground ml-2">
+              for "{{ searchQuery }}"
+            </span>
+          </h1>
+          <p class="text-muted-foreground text-lg">
+            Discover products from the world's leading sports brands
+          </p>
+        </div>
 
         <!-- Search Bar -->
         <div class="mt-6 max-w-md">
@@ -339,26 +350,28 @@ onMounted(() => {
       <div class="flex flex-col lg:flex-row gap-8">
         <!-- Sidebar Filters -->
         <div class="lg:w-80 space-y-6">
-          <!-- Categories -->
+          <!-- Brands -->
           <div class="bg-card border border-border rounded-lg p-6">
             <h3 class="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Zap class="w-4 h-4" />
-              Categories
+              <Award class="w-4 h-4" />
+              Brands
             </h3>
             <div class="space-y-3">
               <Link
-                v-for="cat in categories"
-                :key="cat.id"
-                :href="`/categories/${cat.slug}`"
+                v-for="brandItem in brands"
+                :key="brandItem.id"
+                :href="`/brands/${brandItem.slug}`"
                 class="flex items-center justify-between p-3 rounded-md hover:bg-accent transition-colors"
-                :class="category === cat.name ? 'bg-primary/10 text-primary' : 'text-foreground'"
+                :class="brand === brandItem.name ? 'bg-primary/10 text-primary' : 'text-foreground'"
               >
                 <div class="flex items-center gap-3">
-                  <span class="text-lg">{{ cat.icon || '🏃' }}</span>
-                  <span>{{ cat.name }}</span>
+                  <div v-if="brandItem.logo" class="w-8 h-8 rounded overflow-hidden bg-white p-1">
+                    <img :src="brandItem.logo" :alt="brandItem.name" class="w-full h-full object-contain" />
+                  </div>
+                  <span>{{ brandItem.name }}</span>
                 </div>
                 <BaseBadge variant="secondary" class="text-xs">
-                  {{ cat.products_count || 0 }}
+                  {{ brandItem.products_count || 0 }}
                 </BaseBadge>
               </Link>
             </div>
@@ -384,23 +397,23 @@ onMounted(() => {
               </Button>
             </div>
 
-            <!-- Brands -->
+            <!-- Categories -->
             <div class="mb-6">
-              <h4 class="font-medium text-foreground mb-3">Brands</h4>
+              <h4 class="font-medium text-foreground mb-3">Categories</h4>
               <div class="space-y-2 max-h-48 overflow-y-auto">
                 <label
-                  v-for="brand in brands"
-                  :key="brand.id"
+                  v-for="category in categories"
+                  :key="category.id"
                   class="flex items-center gap-3 cursor-pointer hover:bg-accent p-2 rounded transition-colors"
                 >
                   <input
                     type="checkbox"
-                    :value="brand.slug"
-                    v-model="selectedBrands"
+                    :value="category.slug"
+                    v-model="selectedCategories"
                     class="rounded border-border"
                   />
-                  <span class="text-sm text-foreground">{{ brand.name }}</span>
-                  <span class="text-xs text-muted-foreground">({{ brand.products_count || 0 }})</span>
+                  <span class="text-sm text-foreground">{{ category.name }}</span>
+                  <span class="text-xs text-muted-foreground">({{ category.products_count || 0 }})</span>
                 </label>
               </div>
             </div>
@@ -525,9 +538,9 @@ onMounted(() => {
               :is-sale="product.discount > 0"
               :discount="product.discount_percentage || product.discount"
               :in-stock="product.has_stock"
+              @add-to-cart="handleAddToCart"
               @add-to-wishlist="handleAddToWishlist"
               @quick-view="handleQuickView"
-              @open-add-to-cart-modal="handleOpenAddToCartModal"
             />
           </div>
 
@@ -597,10 +610,10 @@ onMounted(() => {
             v-if="sortedProducts.length === 0"
             class="text-center py-12"
           >
-            <div class="text-6xl mb-4">🏃</div>
+            <div class="text-6xl mb-4">🏆</div>
             <h3 class="text-xl font-semibold text-foreground mb-2">No products found</h3>
             <p class="text-muted-foreground mb-4">
-              Try adjusting your filters or browse all categories
+              Try adjusting your filters or browse all brands
             </p>
             <Button @click="clearFilters">
               Clear Filters
@@ -616,14 +629,6 @@ onMounted(() => {
       :message="notificationMessage"
       :type="notificationType"
       @close="handleNotificationClose"
-    />
-
-    <!-- Add to Cart Modal -->
-    <AddToCartModal
-      :is-open="showAddToCartModal"
-      :product="selectedProduct"
-      @close="handleCloseAddToCartModal"
-      @added="handleAddToCartSuccess"
     />
   </div>
 </template>
@@ -674,7 +679,7 @@ onMounted(() => {
   background: linear-gradient(to right, hsl(var(--border)) 0%, hsl(var(--border)) 50%, hsl(var(--primary)) 50%, hsl(var(--primary)) 100%);
 }
 
-/* Custom scrollbar for brands list */
+/* Custom scrollbar for categories list */
 .overflow-y-auto::-webkit-scrollbar {
   width: 4px;
 }

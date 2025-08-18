@@ -37,20 +37,20 @@ const props = defineProps({
       <div v-if="products && products.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         <ProductCard
           v-for="product in products"
-           :key="product.id"
+          :key="product.id"
           :id="product.id"
           :name="product.name"
           :price="product.final_price || product.price"
-          :original_price="product.discount > 0 ? product.price : null"
+          :original-price="product.discount > 0 ? product.price : null"
           :image="product.images[0] || '/images/placeholder-product.svg'"
-          :discount="product.discount"
+          :discount="product.discount_percentage || product.discount"
           :rating="product.rating"
           :reviews="product.reviews_count"
           :category="product.category?.name"
           :brand="product.brand?.name"
-          :isNew="product.is_featured"
-          :isSale="product.discount > 0"
-          :inStock="product.has_stock"
+          :is-new="product.is_featured"
+          :is-sale="product.discount > 0"
+          :in-stock="product.has_stock"
         />
       </div>
 

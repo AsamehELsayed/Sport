@@ -13,7 +13,7 @@ export function roundPrice(price: number): number {
  * Formats a price as a currency string with 2 decimal places
  */
 export function formatPrice(price: number): string {
-  return `$${roundPrice(price).toFixed(2)}`;
+  return `$${roundPrice(price) }`;
 }
 
 /**

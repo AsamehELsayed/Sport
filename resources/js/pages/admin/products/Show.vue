@@ -22,7 +22,7 @@ const currentImageIndex = ref(0)
 
 const currentImage = computed(() => {
   if (props.product?.images && props.product.images.length > 0) {
-    return `/storage/${props.product.images[currentImageIndex.value]}`
+    return `${props.product.images[currentImageIndex.value]}`
   }
   return '/images/placeholder-product.jpg'
 })
@@ -87,7 +87,7 @@ const selectImage = (index) => {
                   @click="selectImage(index)"
                 >
                   <img
-                    :src="`/storage/${image}`"
+                    :src="`${image}`"
                     :alt="`${product?.name} view ${index + 1}`"
                     class="w-full h-full object-cover"
                   />

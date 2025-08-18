@@ -82,7 +82,7 @@ const activeTab = ref('profile')
 // Computed
 const profilePhotoUrl = computed(() => {
   if (props.user.profile_photo) {
-    return `/storage/${props.user.profile_photo}`
+    return `${props.user.profile_photo}`
   }
   return null
 })

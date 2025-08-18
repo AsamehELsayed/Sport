@@ -15,7 +15,7 @@ class WelcomeController extends Controller
     public function index()
     {
         // Get featured products
-        $featuredProducts = Product::with(['category', 'brand'])
+        $featuredProducts = Product::with(['category', 'brand', 'variants'])
             ->where('is_active', true)
             ->where('is_featured', true)
             ->orderBy('created_at', 'desc')
@@ -41,14 +41,14 @@ class WelcomeController extends Controller
             ->get();
 
         // Get latest products
-        $latestProducts = Product::with(['category', 'brand'])
+        $latestProducts = Product::with(['category', 'brand', 'variants'])
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->limit(8)
             ->get();
 
         // Get sale products
-        $saleProducts = Product::with(['category', 'brand'])
+        $saleProducts = Product::with(['category', 'brand', 'variants'])
             ->where('is_active', true)
             ->where('discount', '>', 0)
             ->orderBy('discount', 'desc')

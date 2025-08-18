@@ -10,7 +10,7 @@
         @change="handleFileChange"
         class="hidden"
       />
-      
+
       <div v-if="!hasImages" @click="triggerFileInput" class="cursor-pointer">
         <div class="mx-auto h-12 w-12 text-muted-foreground">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,17 +31,17 @@
 
     <!-- Preview Images -->
     <div v-if="hasImages" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div 
-        v-for="(image, index) in displayImages" 
+      <div
+        v-for="(image, index) in displayImages"
         :key="index"
         class="relative group aspect-square rounded-lg overflow-hidden border border-border"
       >
-        <img 
-          :src="getImageUrl(image)" 
+        <img
+          :src="getImageUrl(image)"
           :alt="`Image ${index + 1}`"
           class="w-full h-full object-cover"
         />
-        
+
         <!-- Remove Button -->
         <button
           @click="removeImage(index)"
@@ -113,7 +113,7 @@ const getImageUrl = (image) => {
     if (image.startsWith('http')) {
       return image
     }
-    return `/storage/${image}`
+    return `${image}`
   }
   return URL.createObjectURL(image)
 }
