@@ -13,16 +13,38 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $customers = User::where('is_admin', false)
+        $query = User::where('is_admin', false)
             ->withCount('orders')
             ->withSum('orders', 'total')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->with('customerGroups');
+
+        // Filter by group
+        if ($request->has('group_id') && $request->group_id) {
+            $query->whereHas('customerGroups', function ($q) use ($request) {
+                $q->where('customer_group_id', $request->group_id);
+            });
+        }
+
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('phone', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $customers = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        // Get all customer groups for filter dropdown
+        $groups = \App\Models\CustomerGroup::active()->orderBy('name')->get();
 
         return Inertia::render('admin/customers/Index', [
             'customers' => $customers,
+            'groups' => $groups,
+            'filters' => $request->only(['search', 'group_id']),
         ]);
     }
 
@@ -35,12 +57,25 @@ class CustomerController extends Controller
             abort(404);
         }
 
-        $customer->load(['orders' => function ($query) {
-            $query->orderBy('created_at', 'desc');
-        }, 'orders.items.product']);
+        $customer->load([
+            'orders' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'orders.items.product',
+            'customerGroups'
+        ]);
+
+        // Get all available groups for adding customer to groups
+        $availableGroups = \App\Models\CustomerGroup::active()
+            ->whereDoesntHave('customers', function ($query) use ($customer) {
+                $query->where('user_id', $customer->id);
+            })
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('admin/customers/Show', [
             'customer' => $customer,
+            'availableGroups' => $availableGroups,
         ]);
     }
 

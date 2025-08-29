@@ -17,12 +17,13 @@ const props = defineProps({
   topBrands: Array,
   latestProducts: Array,
   saleProducts: Array,
-  stats: Object
+  stats: Object,
+  websiteSettings: Object
 });
 </script>
 
 <template>
-    <HeroSection :stats="stats" />
+    <HeroSection :stats="stats" :website-settings="websiteSettings" />
     <ProductGrid :products="featuredProducts" title="Featured Products" />
     <CategorySection :categories="popularCategories" />
     <BrandSection :brands="topBrands" />

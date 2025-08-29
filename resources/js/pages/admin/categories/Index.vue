@@ -34,9 +34,10 @@
               <tr v-for="category in categories.data" :key="category.id" class="border-b border-border hover:bg-muted/50">
                 <td class="py-3 px-4">
                   <div class="flex items-center space-x-3">
-                    <div v-if="category.image" class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                      <img :src="category.image" :alt="category.name" class="w-10 h-10 rounded-lg object-cover" />
-                    </div>
+                    <div v-if="category.icon" class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                        <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {{category.icon }}
+              </div>                    </div>
                     <div v-else class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
                       <Tag class="w-5 h-5 text-muted-foreground" />
                     </div>

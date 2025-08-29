@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Brand;
@@ -23,30 +24,60 @@ class OrderSeeder extends Seeder
             ]
         );
 
-        // Get existing products
-        $nikeProduct = Product::where('sku', 'NIKE-AM270-001')->first();
-        $adidasProduct = Product::where('sku', 'ADIDAS-UB22-001')->first();
-        $uaProduct = Product::where('sku', 'UA-HOVR-001')->first();
+        // Get existing products with variants
+        $nikeProduct = Product::where('sku', 'NK-AM270-001')->first();
+        $adidasProduct = Product::where('sku', 'AD-UB22-001')->first();
+        $wilsonProduct = Product::where('sku', 'WL-EVO-001')->first();
 
-        // If products don't exist, create them
-        if (!$nikeProduct || !$adidasProduct || !$uaProduct) {
-            $basketballCategory = Category::where('name', 'Basketball')->first();
+        // If products don't exist, create them with variants
+        if (!$nikeProduct || !$adidasProduct || !$wilsonProduct) {
             $runningCategory = Category::where('name', 'Running')->first();
+            $basketballCategory = Category::where('name', 'Basketball')->first();
             $nikeBrand = Brand::where('name', 'Nike')->first();
             $adidasBrand = Brand::where('name', 'Adidas')->first();
-            $underArmourBrand = Brand::where('name', 'Under Armour')->first();
+            $wilsonBrand = Brand::where('name', 'Wilson')->first();
 
             if (!$nikeProduct) {
                 $nikeProduct = Product::create([
                     'name' => 'Nike Air Max 270',
                     'description' => 'Premium running shoes with Air Max technology',
                     'price' => 149.99,
-                    'images' => ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop'],
                     'category_id' => $runningCategory->id,
                     'brand_id' => $nikeBrand->id,
-                    'sku' => 'NIKE-AM270-001',
+                    'sku' => 'NK-AM270-001',
                     'is_active' => true,
                     'is_featured' => true,
+                ]);
+
+                // Create variants for Nike product
+                $nikeProduct->variants()->createMany([
+                    [
+                        'size' => '9',
+                        'color' => 'Pure White',
+                        'stock' => 20,
+                        'sku' => 'NK-AM270-001-9-Pure-White',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => true,
+                    ],
+                    [
+                        'size' => '10',
+                        'color' => 'Pure White',
+                        'stock' => 18,
+                        'sku' => 'NK-AM270-001-10-Pure-White',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => false,
+                    ],
+                    [
+                        'size' => '9',
+                        'color' => 'Crimson',
+                        'stock' => 15,
+                        'sku' => 'NK-AM270-001-9-Crimson',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => false,
+                    ]
                 ]);
             }
 
@@ -54,30 +85,68 @@ class OrderSeeder extends Seeder
                 $adidasProduct = Product::create([
                     'name' => 'Adidas Ultraboost 22',
                     'description' => 'High-performance running shoes with Boost technology',
-                    'price' => 199.98,
-                    'images' => ['https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop'],
+                    'price' => 189.99,
                     'category_id' => $runningCategory->id,
                     'brand_id' => $adidasBrand->id,
-                    'sku' => 'ADIDAS-UB22-001',
+                    'sku' => 'AD-UB22-001',
                     'is_active' => true,
                     'is_featured' => true,
                 ]);
+
+                // Create variants for Adidas product
+                $adidasProduct->variants()->createMany([
+                    [
+                        'size' => '9',
+                        'color' => 'Classic Black',
+                        'stock' => 16,
+                        'sku' => 'AD-UB22-001-9-Classic-Black',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => true,
+                    ],
+                    [
+                        'size' => '10',
+                        'color' => 'Classic Black',
+                        'stock' => 19,
+                        'sku' => 'AD-UB22-001-10-Classic-Black',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => false,
+                    ]
+                ]);
             }
 
-            if (!$uaProduct) {
-                $uaProduct = Product::create([
-                    'name' => 'Under Armour HOVR',
-                    'description' => 'Comfortable training shoes with HOVR cushioning',
-                    'price' => 149.99,
-                    'images' => ['https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop'],
+            if (!$wilsonProduct) {
+                $wilsonProduct = Product::create([
+                    'name' => 'Wilson Evolution Basketball',
+                    'description' => 'Official game ball with premium composite leather',
+                    'price' => 64.99,
                     'category_id' => $basketballCategory->id,
-                    'brand_id' => $underArmourBrand->id,
-                    'sku' => 'UA-HOVR-001',
+                    'brand_id' => $wilsonBrand->id,
+                    'sku' => 'WL-EVO-001',
                     'is_active' => true,
                     'is_featured' => false,
                 ]);
+
+                // Create variants for Wilson product
+                $wilsonProduct->variants()->createMany([
+                    [
+                        'size' => 'Official Size',
+                        'color' => 'Amber',
+                        'stock' => 15,
+                        'sku' => 'WL-EVO-001-Official-Size-Amber',
+                        'price_adjustment' => 0,
+                        'is_active' => true,
+                        'is_default' => true,
+                    ]
+                ]);
             }
         }
+
+        // Get variants for order items
+        $nikeVariant = $nikeProduct->variants()->where('size', '10')->where('color', 'Pure White')->first();
+        $adidasVariant = $adidasProduct->variants()->where('size', '9')->where('color', 'Classic Black')->first();
+        $wilsonVariant = $wilsonProduct->variants()->first();
 
         // Create sample orders
         $orders = [
@@ -101,6 +170,7 @@ class OrderSeeder extends Seeder
                         'product_id' => $nikeProduct->id,
                         'quantity' => 2,
                         'size' => '10',
+                        'color' => 'Pure White',
                     ]
                 ]
             ],
@@ -124,6 +194,7 @@ class OrderSeeder extends Seeder
                         'product_id' => $adidasProduct->id,
                         'quantity' => 1,
                         'size' => '9',
+                        'color' => 'Classic Black',
                     ]
                 ]
             ],
@@ -144,9 +215,10 @@ class OrderSeeder extends Seeder
                 'shipping' => 10.00,
                 'items' => [
                     [
-                        'product_id' => $uaProduct->id,
+                        'product_id' => $wilsonProduct->id,
                         'quantity' => 3,
-                        'size' => '11',
+                        'size' => 'Official Size',
+                        'color' => 'Amber',
                     ]
                 ]
             ]
@@ -167,23 +239,32 @@ class OrderSeeder extends Seeder
             foreach ($items as $itemData) {
                 $product = Product::find($itemData['product_id']);
 
-                // Add some discounts to make it interesting
+                // Find the specific variant
+                $variant = $product->variants()
+                    ->where('size', $itemData['size'])
+                    ->where('color', $itemData['color'])
+                    ->first();
+
+                // Calculate final price with variant adjustment
                 $originalPrice = $product->price;
+                $variantAdjustment = $variant ? $variant->price_adjustment : 0;
+                $basePrice = $originalPrice + $variantAdjustment;
+
                 $discountPercentage = 0;
                 $discountAmount = 0;
-                $finalPrice = $originalPrice;
+                $finalPrice = $basePrice;
 
                 // Apply discounts to some items
-                if ($product->sku === 'NIKE-AM270-001') {
+                if ($product->sku === 'NK-AM270-001') {
                     // 20% discount on Nike shoes
                     $discountPercentage = 20.00;
-                    $discountAmount = $originalPrice * ($discountPercentage / 100);
-                    $finalPrice = $originalPrice - $discountAmount;
-                } elseif ($product->sku === 'ADIDAS-UB22-001') {
+                    $discountAmount = $basePrice * ($discountPercentage / 100);
+                    $finalPrice = $basePrice - $discountAmount;
+                } elseif ($product->sku === 'AD-UB22-001') {
                     // 15% discount on Adidas shoes
                     $discountPercentage = 15.00;
-                    $discountAmount = $originalPrice * ($discountPercentage / 100);
-                    $finalPrice = $originalPrice - $discountAmount;
+                    $discountAmount = $basePrice * ($discountPercentage / 100);
+                    $finalPrice = $basePrice - $discountAmount;
                 }
 
                 $itemSubtotal = $finalPrice * $itemData['quantity'];

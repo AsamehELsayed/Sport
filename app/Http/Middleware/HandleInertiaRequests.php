@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\WebsiteSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -39,13 +40,26 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+        $websiteSettings = WebsiteSetting::getAllAsArray();
+
+        $appearance = [
+            'primary_color' => $websiteSettings['primary_color'] ?? '#3B82F6',
+            'secondary_color' => $websiteSettings['secondary_color'] ?? '#1F2937',
+            'accent_color' => $websiteSettings['accent_color'] ?? '#10B981',
+            'page_name' => $websiteSettings['page_name'] ?? config('app.name'),
+            'website_name' => $websiteSettings['website_name'] ?? config('app.name'),
+            'logo_path' => $websiteSettings['logo_path'] ?? null,
+        ];
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
+            'appearance' => $appearance,
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

@@ -6,6 +6,53 @@
       <p class="text-muted-foreground">Manage customer accounts and view their information</p>
     </div>
 
+    <!-- Search and Filters -->
+    <Card>
+      <CardContent class="p-6">
+        <form @submit.prevent="search" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-2">
+              <label for="search" class="text-sm font-medium">Search</label>
+              <Input
+                id="search"
+                v-model="searchForm.search"
+                type="text"
+                placeholder="Search by name, email, or phone..."
+              />
+            </div>
+            <div class="space-y-2">
+              <label for="group" class="text-sm font-medium">Filter by Group</label>
+              <select
+                id="group"
+                v-model="searchForm.group_id"
+                class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">All Groups</option>
+                <option v-for="group in groups" :key="group.id" :value="group.id">
+                  {{ group.name }}
+                </option>
+              </select>
+            </div>
+            <div class="flex items-end space-x-2">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Search
+              </button>
+              <button
+                type="button"
+                @click="clearFilters"
+                class="px-4 py-2 border border-input rounded-md hover:bg-muted transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+
     <!-- Customers Table -->
     <Card>
       <CardContent class="p-0">
@@ -30,9 +77,15 @@
                     </div>
                     <div>
                       <p class="font-medium">{{ customer.name }}</p>
-                      <p v-if="customer.preferred_sports?.length" class="text-sm text-muted-foreground">
-                        {{ customer.preferred_sports.join(', ') }}
-                      </p>
+                      <div v-if="customer.customer_groups && customer.customer_groups.length > 0" class="flex items-center space-x-1 mt-1">
+                        <div
+                          v-for="group in customer.customer_groups"
+                          :key="group.id"
+                          class="w-2 h-2 rounded-full"
+                          :style="{ backgroundColor: group.color }"
+                          :title="group.name"
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -106,9 +159,10 @@
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import Card from '@/components/ui/card/Card.vue'
 import CardContent from '@/components/ui/card/CardContent.vue'
+import Input from '@/components/ui/input/Input.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 
 defineOptions({
@@ -117,7 +171,29 @@ defineOptions({
 
 const props = defineProps({
   customers: Object,
+  groups: Array,
+  filters: Object,
 })
+
+const searchForm = useForm({
+  search: props.filters?.search || '',
+  group_id: props.filters?.group_id || '',
+})
+
+const search = () => {
+  searchForm.get(route('admin.customers.index'), {
+    preserveState: true,
+    preserveScroll: true,
+  })
+}
+
+const clearFilters = () => {
+  searchForm.reset()
+  searchForm.get(route('admin.customers.index'), {
+    preserveState: true,
+    preserveScroll: true,
+  })
+}
 
 const formatNumber = (number) => {
   return new Intl.NumberFormat().format(number)

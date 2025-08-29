@@ -79,7 +79,7 @@ const handleQuickView = (product: any) => {
           :name="product.name"
           :price="product.final_price || product.price"
           :original-price="product.discount > 0 ? product.price : null"
-          :image="product.images && product.images.length > 0 ? `${product.images[0]}` : '/images/placeholder-product.svg'"
+          :image="product.main_image || '/images/placeholder-product.jpg'"
           :discount="product.discount_percentage || product.discount"
           :rating="product.rating"
           :reviews="product.reviews_count"

@@ -37,8 +37,8 @@
                   <div class="flex items-center gap-3">
                     <div class="w-16 h-16 rounded-lg overflow-hidden bg-muted">
                       <img
-                        v-if="product.images && product.images.length > 0"
-                        :src="`${product.images[0]}`"
+                        v-if="product.main_image && product.main_image !== '/images/placeholder-product.jpg'"
+                        :src="product.main_image"
                         :alt="product.name"
                         class="w-full h-full object-cover"
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
@@ -124,20 +124,26 @@
         <!-- Pagination -->
         <div v-if="products?.links && products.links.length > 3" class="p-4 border-t border-border">
           <div class="flex items-center justify-center space-x-1">
-            <Link
-              v-for="(link, index) in products.links"
-              :key="index"
-              :href="link.url"
-              :class="[
-                'px-3 py-2 text-sm rounded-md transition-colors',
-                link.active
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-                !link.url ? 'opacity-50 cursor-not-allowed' : ''
-              ]"
-            >
-              <span v-html="link.label"></span>
-            </Link>
+            <template v-for="(link, index) in products.links" :key="index">
+              <Link
+                v-if="link.url"
+                :href="link.url"
+                :class="[
+                  'px-3 py-2 text-sm rounded-md transition-colors',
+                  link.active
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ]"
+              >
+                <span v-html="link.label"></span>
+              </Link>
+              <span
+                v-else
+                class="px-3 py-2 text-sm rounded-md opacity-50 cursor-not-allowed"
+              >
+                <span v-html="link.label"></span>
+              </span>
+            </template>
           </div>
         </div>
       </div>

@@ -57,6 +57,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class)->where('is_active', true)->where('stock', '>', 0);
     }
 
+    public function defaultVariant(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('is_default', true);
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -108,9 +113,12 @@ class Product extends Model
     // Image handling methods
     public function getMainImageAttribute(): string
     {
-        if ($this->images && count($this->images) > 0) {
-            return asset('storage/' . $this->images[0]);
+        $defaultVariant = $this->defaultVariant()->first();
+        if ($defaultVariant && $defaultVariant->has_images) {
+            return $defaultVariant->main_image;
         }
+
+        // If no default variant with images, return placeholder
         return asset('images/placeholder-product.jpg');
     }
 
@@ -128,7 +136,35 @@ class Product extends Model
     {
         return $this->images && count($this->images) > 0;
     }
+    /**
+     * Get the images attribute as an array.
+     *
+     * @return array
+     */
+    public function getImagesAttribute($value): array
+    {
+        if (is_array($value)) {
+            return array_map(function($image) {
+                return asset('storage/' . ltrim($image, '/'));
+            }, $value);
+        }
 
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return array_map(function($image) {
+                    return asset('storage/' . ltrim($image, '/'));
+                }, $decoded);
+            }
+            // Fallback: comma-separated string
+            $images = array_filter(array_map('trim', explode(',', $value)));
+            return array_map(function($image) {
+                return asset('storage/' . ltrim($image, '/'));
+            }, $images);
+        }
+
+        return [];
+    }
     // Safe image access methods
     public function getSafeMainImageAttribute(): string
     {

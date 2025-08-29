@@ -16,8 +16,8 @@
 
       <nav class="mt-6 px-3">
         <div class="space-y-1">
-          <Link 
-            href="/admin" 
+          <Link
+            href="/admin"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.dashboard') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -25,8 +25,8 @@
             Dashboard
           </Link>
 
-          <Link 
-            href="/admin/orders" 
+          <Link
+            href="/admin/orders"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.orders.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -34,8 +34,8 @@
             Orders
           </Link>
 
-          <Link 
-            href="/admin/products" 
+          <Link
+            href="/admin/products"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.products.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -43,8 +43,8 @@
             Products
           </Link>
 
-          <Link 
-            href="/admin/categories" 
+          <Link
+            href="/admin/categories"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.categories.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -52,8 +52,8 @@
             Categories
           </Link>
 
-          <Link 
-            href="/admin/brands" 
+          <Link
+            href="/admin/brands"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.brands.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -61,8 +61,8 @@
             Brands
           </Link>
 
-          <Link 
-            href="/admin/customers" 
+          <Link
+            href="/admin/customers"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.customers.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -70,8 +70,17 @@
             Customers
           </Link>
 
-          <Link 
-            href="/admin/invoices" 
+          <Link
+            href="/admin/customer-groups"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="route().current('admin.customer-groups.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
+          >
+            <Users class="w-5 h-5 mr-3" />
+            Customer Groups
+          </Link>
+
+          <Link
+            href="/admin/invoices"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
             :class="route().current('admin.invoices.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
@@ -79,17 +88,50 @@
             Invoices
           </Link>
 
-          <Link 
-            href="#" 
+          <!-- Email Marketing Section -->
+          <div class="pt-4 pb-2">
+            <h3 class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Marketing</h3>
+          </div>
+
+          <Link
+            href="/admin/email-campaigns"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="route().current('admin.email-campaigns.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
+          >
+            <Mail class="w-5 h-5 mr-3" />
+            Email Campaigns
+          </Link>
+
+          <Link
+            href="/admin/email-templates"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="route().current('admin.email-templates.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
+          >
+            <FileText class="w-5 h-5 mr-3" />
+            Email Templates
+          </Link>
+
+          <Link
+            href="/admin/email-settings"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="route().current('admin.email-settings.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
+          >
+            <Settings class="w-5 h-5 mr-3" />
+            Email Settings
+          </Link>
+
+          <Link
+            href="#"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <BarChart3 class="w-5 h-5 mr-3" />
             Analytics
           </Link>
 
-          <Link 
-            href="#" 
-            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          <Link
+            href="/admin/settings/profile"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="route().current('admin.settings.*') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'"
           >
             <Settings class="w-5 h-5 mr-3" />
             Settings
@@ -101,15 +143,15 @@
     <!-- Main content -->
     <div class="lg:pl-64">
       <!-- Header -->
-      <header class="bg-card border-b border-border h-16 flex items-center justify-between px-6">
-        <div class="flex items-center space-x-4">
+      <header class="bg-card border-b border-border h-16 flex items-center justify-between px-4 lg:px-6">
+        <div class="flex items-center space-x-3 lg:space-x-4">
           <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-md hover:bg-muted">
             <Menu class="w-5 h-5" />
           </button>
-          <h1 class="text-xl font-semibold text-foreground">{{ pageTitle }}</h1>
+          <h1 class="text-lg lg:text-xl font-semibold text-foreground truncate">{{ pageTitle }}</h1>
         </div>
 
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 lg:space-x-4">
           <button class="p-2 rounded-md hover:bg-muted">
             <Bell class="w-5 h-5" />
           </button>
@@ -139,7 +181,7 @@
       </header>
 
       <!-- Page content -->
-      <main class="p-6">
+      <main class="p-4 lg:p-6">
         <slot />
       </main>
     </div>
@@ -152,13 +194,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
-import { 
-  Zap, 
-  X, 
-  Menu, 
-  Bell, 
-  ChevronDown, 
-  User, 
+import {
+  Zap,
+  X,
+  Menu,
+  Bell,
+  ChevronDown,
+  User,
   LogOut,
   LayoutDashboard,
   Package,
@@ -168,7 +210,8 @@ import {
   Settings,
   Tag,
   Award,
-  FileText
+  FileText,
+  Mail
 } from 'lucide-vue-next'
 
 const sidebarOpen = ref(false)
@@ -184,8 +227,15 @@ const pageTitle = computed(() => {
   if (route.includes('/admin/categories')) return 'Categories'
   if (route.includes('/admin/brands')) return 'Brands'
   if (route.includes('/admin/customers')) return 'Customers'
+  if (route.includes('/admin/customer-groups')) return 'Customer Groups'
   if (route.includes('/admin/invoices')) return 'Invoices'
+  if (route.includes('/admin/email-campaigns')) return 'Email Campaigns'
+  if (route.includes('/admin/email-templates')) return 'Email Templates'
+  if (route.includes('/admin/email-settings')) return 'Email Settings'
   if (route.includes('/admin/analytics')) return 'Analytics'
+  if (route.includes('/admin/settings/profile')) return 'Profile Settings'
+  if (route.includes('/admin/settings/account')) return 'Account Settings'
+  if (route.includes('/admin/settings/password')) return 'Password Settings'
   if (route.includes('/admin/settings')) return 'Settings'
   return 'Dashboard'
 })
@@ -204,4 +254,4 @@ onMounted(() => {
     }
   })
 })
-</script> 
+</script>

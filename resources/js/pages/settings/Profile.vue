@@ -7,8 +7,8 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import SettingsLayout from '@/layouts/admin/SettingsLayout.vue';
 import { type BreadcrumbItem, type User } from '@/types';
 
 interface Props {
@@ -21,7 +21,7 @@ defineProps<Props>();
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Profile settings',
-        href: '/settings/profile',
+        href: '/admin/settings/profile',
     },
 ];
 
@@ -30,14 +30,14 @@ const user = page.props.auth.user as User;
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
+    <AdminLayout>
         <Head title="Profile settings" />
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
                 <HeadingSmall title="Profile information" description="Update your name and email address" />
 
-                <Form method="patch" :action="route('profile.update')" class="space-y-6" v-slot="{ errors, processing, recentlySuccessful }">
+                <Form method="patch" :action="route('admin.settings.profile.update')" class="space-y-6" v-slot="{ errors, processing, recentlySuccessful }">
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input
@@ -102,5 +102,5 @@ const user = page.props.auth.user as User;
 
             <DeleteUser />
         </SettingsLayout>
-    </AppLayout>
+    </AdminLayout>
 </template>

@@ -54,6 +54,13 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_id', 'product_id')
+            ->where('size', $this->size)
+            ->where('color', $this->color);
+    }
+
     // Helper methods
     public function getFormattedPriceAttribute(): string
     {

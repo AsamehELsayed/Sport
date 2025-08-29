@@ -23,106 +23,201 @@ class ProductSeeder extends Seeder
         $wilsonBrand = Brand::where('name', 'Wilson')->first();
         $spaldingBrand = Brand::where('name', 'Spalding')->first();
 
-        // Create sample products with placeholder images
+        // Create sample products with color groups and multiple sizes
         $products = [
             [
                 'name' => 'Nike Air Zoom Pegasus 40',
                 'description' => 'The Nike Air Zoom Pegasus 40 delivers a smooth, responsive ride with enhanced cushioning and breathable mesh upper.',
                 'price' => 129.99,
-                'images' => [], // Empty array for now - will use placeholder
                 'category_id' => $runningCategory?->id,
                 'brand_id' => $nikeBrand?->id,
                 'sku' => 'NK-PEG40-001',
                 'is_active' => true,
                 'is_featured' => true,
                 'discount' => 0,
-                'variants' => [
-                    ['size' => '7', 'color' => 'Black', 'stock' => 25, 'sku' => 'NK-PEG40-001-7', 'price_adjustment' => 0],
-                    ['size' => '8', 'color' => 'Black', 'stock' => 30, 'sku' => 'NK-PEG40-001-8', 'price_adjustment' => 0],
-                    ['size' => '9', 'color' => 'Black', 'stock' => 28, 'sku' => 'NK-PEG40-001-9', 'price_adjustment' => 0],
-                    ['size' => '10', 'color' => 'Black', 'stock' => 22, 'sku' => 'NK-PEG40-001-10', 'price_adjustment' => 0],
+                'colorGroups' => [
+                    [
+                        'color' => 'Classic Black',
+                        'sizes' => [
+                            ['size' => '7', 'stock' => 25, 'price_adjustment' => 0],
+                            ['size' => '8', 'stock' => 30, 'price_adjustment' => 0],
+                            ['size' => '9', 'stock' => 28, 'price_adjustment' => 0],
+                            ['size' => '10', 'stock' => 22, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/nike-pegasus-black-1.jpg', 'products/nike-pegasus-black-2.jpg']
+                    ],
+                    [
+                        'color' => 'Pure White',
+                        'sizes' => [
+                            ['size' => '7', 'stock' => 20, 'price_adjustment' => 0],
+                            ['size' => '8', 'stock' => 25, 'price_adjustment' => 0],
+                            ['size' => '9', 'stock' => 23, 'price_adjustment' => 0],
+                            ['size' => '10', 'stock' => 18, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/nike-pegasus-white-1.jpg', 'products/nike-pegasus-white-2.jpg']
+                    ],
+                    [
+                        'color' => 'Royal Blue',
+                        'sizes' => [
+                            ['size' => '8', 'stock' => 15, 'price_adjustment' => 5.00],
+                            ['size' => '9', 'stock' => 18, 'price_adjustment' => 5.00],
+                            ['size' => '10', 'stock' => 12, 'price_adjustment' => 5.00],
+                        ],
+                        'images' => ['products/nike-pegasus-blue-1.jpg']
+                    ]
                 ]
             ],
             [
                 'name' => 'Wilson Evolution Basketball',
                 'description' => 'The Wilson Evolution Basketball is the official game ball of many high school and college leagues. Premium composite leather construction provides exceptional grip and feel.',
                 'price' => 64.99,
-                'images' => [], // Empty array for now - will use placeholder
                 'category_id' => $basketballCategory?->id,
                 'brand_id' => $wilsonBrand?->id,
                 'sku' => 'WL-EVO-001',
                 'is_active' => true,
                 'is_featured' => false,
                 'discount' => 0,
-                'variants' => [
-                    ['size' => 'Official Size', 'color' => 'Orange', 'stock' => 15, 'sku' => 'WL-EVO-001-OS', 'price_adjustment' => 0],
+                'colorGroups' => [
+                    [
+                        'color' => 'Amber',
+                        'sizes' => [
+                            ['size' => 'Official Size', 'stock' => 15, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/wilson-evolution-amber-1.jpg']
+                    ]
                 ]
             ],
             [
                 'name' => 'Adidas Tango Soccer Ball',
                 'description' => 'Professional grade soccer ball with premium synthetic leather cover and butyl bladder for optimal performance.',
                 'price' => 44.99,
-                'images' => [], // Empty array for now - will use placeholder
                 'category_id' => $soccerCategory?->id,
                 'brand_id' => $adidasBrand?->id,
                 'sku' => 'AD-TANGO-001',
                 'is_active' => true,
                 'is_featured' => false,
                 'discount' => 10.00,
-                'variants' => [
-                    ['size' => 'Size 5', 'color' => 'White/Black', 'stock' => 20, 'sku' => 'AD-TANGO-001-5', 'price_adjustment' => 0],
+                'colorGroups' => [
+                    [
+                        'color' => 'Pure White',
+                        'sizes' => [
+                            ['size' => 'Size 5', 'stock' => 20, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/adidas-tango-white-1.jpg', 'products/adidas-tango-white-2.jpg']
+                    ]
                 ]
             ],
             [
                 'name' => 'Spalding NBA Official Basketball',
                 'description' => 'Official NBA game ball with premium composite leather and deep channel design for superior grip and control.',
                 'price' => 109.99,
-                'images' => [], // Empty array for now - will use placeholder
                 'category_id' => $basketballCategory?->id,
                 'brand_id' => $spaldingBrand?->id,
                 'sku' => 'SP-NBA-001',
                 'is_active' => true,
                 'is_featured' => true,
                 'discount' => 20.00,
-                'variants' => [
-                    ['size' => 'Official Size', 'color' => 'Orange', 'stock' => 12, 'sku' => 'SP-NBA-001-OS', 'price_adjustment' => 0],
+                'colorGroups' => [
+                    [
+                        'color' => 'Amber',
+                        'sizes' => [
+                            ['size' => 'Official Size', 'stock' => 12, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/spalding-nba-amber-1.jpg']
+                    ]
                 ]
             ],
             [
                 'name' => 'Nike Air Max 270',
                 'description' => 'Iconic Air Max design with visible Air unit and breathable mesh upper for all-day comfort.',
                 'price' => 149.99,
-                'images' => [], // Empty array for now - will use placeholder
                 'category_id' => $runningCategory?->id,
                 'brand_id' => $nikeBrand?->id,
                 'sku' => 'NK-AM270-001',
                 'is_active' => true,
                 'is_featured' => false,
                 'discount' => 0,
-                'variants' => [
-                    ['size' => '8', 'color' => 'White', 'stock' => 18, 'sku' => 'NK-AM270-001-8', 'price_adjustment' => 0],
-                    ['size' => '9', 'color' => 'White', 'stock' => 22, 'sku' => 'NK-AM270-001-9', 'price_adjustment' => 0],
-                    ['size' => '10', 'color' => 'White', 'stock' => 20, 'sku' => 'NK-AM270-001-10', 'price_adjustment' => 0],
+                'colorGroups' => [
+                    [
+                        'color' => 'Pure White',
+                        'sizes' => [
+                            ['size' => '8', 'stock' => 18, 'price_adjustment' => 0],
+                            ['size' => '9', 'stock' => 22, 'price_adjustment' => 0],
+                            ['size' => '10', 'stock' => 20, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/nike-airmax-white-1.jpg', 'products/nike-airmax-white-2.jpg']
+                    ],
+                    [
+                        'color' => 'Crimson',
+                        'sizes' => [
+                            ['size' => '8', 'stock' => 12, 'price_adjustment' => 0],
+                            ['size' => '9', 'stock' => 15, 'price_adjustment' => 0],
+                            ['size' => '10', 'stock' => 13, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/nike-airmax-red-1.jpg']
+                    ]
+                ]
+            ],
+            [
+                'name' => 'Adidas Ultraboost 22',
+                'description' => 'Revolutionary running shoe with responsive Boost midsole and Primeknit upper for ultimate comfort and performance.',
+                'price' => 189.99,
+                'category_id' => $runningCategory?->id,
+                'brand_id' => $adidasBrand?->id,
+                'sku' => 'AD-UB22-001',
+                'is_active' => true,
+                'is_featured' => true,
+                'discount' => 15.00,
+                'colorGroups' => [
+                    [
+                        'color' => 'Classic Black',
+                        'sizes' => [
+                            ['size' => '8', 'stock' => 16, 'price_adjustment' => 0],
+                            ['size' => '9', 'stock' => 19, 'price_adjustment' => 0],
+                            ['size' => '10', 'stock' => 17, 'price_adjustment' => 0],
+                        ],
+                        'images' => ['products/adidas-ultraboost-black-1.jpg', 'products/adidas-ultraboost-black-2.jpg']
+                    ],
+                    [
+                        'color' => 'Sky Blue',
+                        'sizes' => [
+                            ['size' => '8', 'stock' => 10, 'price_adjustment' => 10.00],
+                            ['size' => '9', 'stock' => 12, 'price_adjustment' => 10.00],
+                            ['size' => '10', 'stock' => 11, 'price_adjustment' => 10.00],
+                        ],
+                        'images' => ['products/adidas-ultraboost-blue-1.jpg']
+                    ]
                 ]
             ],
         ];
 
         foreach ($products as $productData) {
-            $variants = $productData['variants'];
-            unset($productData['variants']);
+            $colorGroups = $productData['colorGroups'];
+            unset($productData['colorGroups']);
 
             $product = Product::create($productData);
 
-            // Create variants
-            foreach ($variants as $variantData) {
-                $product->variants()->create([
-                    'size' => $variantData['size'],
-                    'color' => $variantData['color'],
-                    'stock' => $variantData['stock'],
-                    'sku' => $variantData['sku'],
-                    'price_adjustment' => $variantData['price_adjustment'],
-                    'is_active' => true,
-                ]);
+            // Create variants from color groups
+            $hasDefault = false;
+            foreach ($colorGroups as $colorGroupIndex => $colorGroup) {
+                foreach ($colorGroup['sizes'] as $sizeIndex => $sizeData) {
+                    // Set first variant as default
+                    $isDefault = !$hasDefault && $colorGroupIndex === 0 && $sizeIndex === 0;
+                    if ($isDefault) {
+                        $hasDefault = true;
+                    }
+
+                    $product->variants()->create([
+                        'size' => $sizeData['size'],
+                        'color' => $colorGroup['color'],
+                        'images' => $colorGroup['images'],
+                        'stock' => $sizeData['stock'],
+                        'sku' => $product->sku . '-' . $sizeData['size'] . '-' . str_replace(' ', '-', $colorGroup['color']),
+                        'price_adjustment' => $sizeData['price_adjustment'],
+                        'is_active' => true,
+                        'is_default' => $isDefault,
+                    ]);
+                }
             }
         }
     }

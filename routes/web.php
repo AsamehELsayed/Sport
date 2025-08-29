@@ -53,6 +53,42 @@ Route::get('/api/products/{product}/details', function (App\Models\Product $prod
     ]);
 })->name('api.products.details');
 
+// Email tracking routes
+Route::get('/track/open/{id}', function ($id) {
+    $recipient = \App\Models\EmailCampaignRecipient::where('tracking_id', $id)->first();
+
+    if ($recipient && $recipient->status === 'sent') {
+        $recipient->update([
+            'status' => 'opened',
+            'opened_at' => now(),
+        ]);
+
+        // Update campaign stats
+        $recipient->campaign->increment('opened_count');
+    }
+
+    // Return a 1x1 transparent pixel
+    $pixel = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+    return response($pixel, 200, ['Content-Type' => 'image/gif']);
+})->name('track.open');
+
+Route::get('/unsubscribe/{token}', function ($token) {
+    $recipient = \App\Models\EmailCampaignRecipient::where('tracking_id', $token)->first();
+
+    if ($recipient) {
+        // Update user's marketing preferences
+        $recipient->recipient->update(['marketing_emails' => false]);
+
+        return view('unsubscribe', [
+            'message' => 'You have been successfully unsubscribed from marketing emails.',
+        ]);
+    }
+
+    return view('unsubscribe', [
+        'message' => 'Invalid unsubscribe link.',
+    ]);
+})->name('unsubscribe');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/customer.php';

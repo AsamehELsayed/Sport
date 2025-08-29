@@ -60,30 +60,30 @@ const isLoading = ref(false)
 const showEmptyCart = ref(false)
 
 // Methods
-function handleUpdateQuantity(itemId, size, newQuantity) {
-  updateQuantity(itemId, size, newQuantity)
+function handleUpdateQuantity(itemId, size, color, newQuantity) {
+  updateQuantity(itemId, size, color, newQuantity)
   if (cartItems.value.length === 0) {
     showEmptyCart.value = true
   }
 }
 
-function handleRemoveFromCart(itemId, size) {
-  removeFromCart(itemId, size)
+function handleRemoveFromCart(itemId, size, color) {
+  removeFromCart(itemId, size, color)
   if (cartItems.value.length === 0) {
     showEmptyCart.value = true
   }
 }
 
-function handleMoveToSaved(itemId, size) {
-  moveToSaved(itemId, size)
+function handleMoveToSaved(itemId, size, color) {
+  moveToSaved(itemId, size, color)
 }
 
-function handleMoveToCart(itemId, size) {
-  moveToCart(itemId, size)
+function handleMoveToCart(itemId, size, color) {
+  moveToCart(itemId, size, color)
 }
 
-function handleRemoveFromSaved(itemId, size) {
-  removeFromSaved(itemId, size)
+function handleRemoveFromSaved(itemId, size, color) {
+  removeFromSaved(itemId, size, color)
 }
 
 function continueShopping() {
@@ -184,6 +184,7 @@ onMounted(() => {
                         <div class="flex items-center gap-2 mb-2">
                           <Badge variant="secondary">{{ item.category }}</Badge>
                           <span class="text-sm text-muted-foreground">Size: {{ item.size }}</span>
+                          <span v-if="item.color && item.color !== 'N/A'" class="text-sm text-muted-foreground">Color: {{ item.color }}</span>
                         </div>
                         <div class="flex items-center gap-2 mb-3">
                           <div class="flex items-center">
@@ -228,25 +229,25 @@ onMounted(() => {
                     <div class="flex items-center justify-between mt-4">
                       <div class="flex items-center gap-3">
                         <div class="flex items-center border rounded-md">
-                                                     <Button
-                             variant="ghost"
-                             size="icon"
-                             class="h-8 w-8"
-                             @click="handleUpdateQuantity(item.id, item.size, item.quantity - 1)"
-                             :disabled="item.quantity <= 1"
-                           >
-                             <Minus class="h-4 w-4" />
-                           </Button>
+                                                                             <Button
+                          variant="ghost"
+                          size="icon"
+                          class="h-8 w-8"
+                          @click="handleUpdateQuantity(item.id, item.size, item.color, item.quantity - 1)"
+                          :disabled="item.quantity <= 1"
+                        >
+                          <Minus class="h-4 w-4" />
+                        </Button>
                            <span class="px-3 py-1 min-w-8 text-center font-medium">{{ item.quantity }}</span>
-                           <Button
-                             variant="ghost"
-                             size="icon"
-                             class="h-8 w-8"
-                             @click="handleUpdateQuantity(item.id, item.size, item.quantity + 1)"
-                             :disabled="!item.inStock || item.quantity >= item.stockQuantity"
-                           >
-                             <Plus class="h-4 w-4" />
-                           </Button>
+                                                   <Button
+                          variant="ghost"
+                          size="icon"
+                          class="h-8 w-8"
+                          @click="handleUpdateQuantity(item.id, item.size, item.color, item.quantity + 1)"
+                          :disabled="!item.inStock || item.quantity >= item.stockQuantity"
+                        >
+                          <Plus class="h-4 w-4" />
+                        </Button>
                         </div>
                         <span class="text-sm text-muted-foreground">
                           Max: {{ item.stockQuantity }}
@@ -254,23 +255,23 @@ onMounted(() => {
                       </div>
 
                       <div class="flex items-center gap-2">
-                                                 <Button
-                           variant="outline"
-                           size="sm"
-                           @click="handleMoveToSaved(item.id, item.size)"
-                         >
-                           <Heart class="w-4 h-4 mr-2" />
-                           Save for later
-                         </Button>
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           @click="handleRemoveFromCart(item.id, item.size)"
-                           class="text-destructive hover:text-destructive"
-                         >
-                           <Trash2 class="w-4 h-4 mr-2" />
-                           Remove
-                         </Button>
+                                                                         <Button
+                          variant="outline"
+                          size="sm"
+                          @click="handleMoveToSaved(item.id, item.size, item.color)"
+                        >
+                          <Heart class="w-4 h-4 mr-2" />
+                          Save for later
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          @click="handleRemoveFromCart(item.id, item.size, item.color)"
+                          class="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 class="w-4 h-4 mr-2" />
+                          Remove
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -300,6 +301,7 @@ onMounted(() => {
                           <div class="flex items-center gap-2 mb-2">
                             <Badge variant="secondary">{{ item.category }}</Badge>
                             <span class="text-sm text-muted-foreground">Size: {{ item.size }}</span>
+                            <span v-if="item.color && item.color !== 'N/A'" class="text-sm text-muted-foreground">Color: {{ item.color }}</span>
                           </div>
                           <div class="flex items-center gap-2 mb-3">
                             <div class="flex items-center">
@@ -320,23 +322,23 @@ onMounted(() => {
                         </div>
                       </div>
                       <div class="flex items-center gap-2 mt-4">
-                                                 <Button
-                           variant="outline"
-                           size="sm"
-                           @click="handleMoveToCart(item.id, item.size)"
-                         >
-                           <ShoppingCart class="w-4 h-4 mr-2" />
-                           Move to cart
-                         </Button>
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           @click="handleRemoveFromSaved(item.id, item.size)"
-                           class="text-destructive hover:text-destructive"
-                         >
-                           <Trash2 class="w-4 h-4 mr-2" />
-                           Remove
-                         </Button>
+                                                                         <Button
+                          variant="outline"
+                          size="sm"
+                          @click="handleMoveToCart(item.id, item.size, item.color)"
+                        >
+                          <ShoppingCart class="w-4 h-4 mr-2" />
+                          Move to cart
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          @click="handleRemoveFromSaved(item.id, item.size, item.color)"
+                          class="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 class="w-4 h-4 mr-2" />
+                          Remove
+                        </Button>
                       </div>
                     </div>
                   </div>

@@ -17,6 +17,8 @@ import TabsContent from "@/components/ui/tabs/TabsContent.vue"
 import { Star, Heart, ShoppingCart, Minus, Plus, Truck, Shield, RotateCcw, AlertCircle, CheckCircle } from "lucide-vue-next"
 
 import GuestLayout from '@/layouts/GuestLayout.vue';
+import ProductImages from '@/components/guest/ProductImages.vue';
+import ProductInfo from '@/components/guest/ProductInfo.vue';
 
 defineOptions({
     layout: GuestLayout,
@@ -32,6 +34,8 @@ const { addToCart } = useCart()
 
 const quantity = ref(1)
 const selectedSize = ref("")
+const selectedColor = ref("")
+const selectedVariant = ref(null)
 const isFavorite = ref(false)
 const currentImageIndex = ref(0)
 const isLoading = ref(false)
@@ -39,22 +43,73 @@ const showAddedToCart = ref(false)
 
 // Computed properties
 const currentImage = computed(() => {
-  if (props.product?.images && props.product.images.length > 0) {
-    return `${props.product.images[currentImageIndex.value]}`
+  // If a variant is selected and has images, use variant images
+  if (selectedVariant.value && selectedVariant.value.has_images) {
+    return selectedVariant.value.main_image
   }
-  return '/images/placeholder-product.svg'
+
+  // If no variant selected, try to get default variant images
+  const defaultVariant = availableVariants.value.find(v => v.is_default && v.has_images)
+  if (defaultVariant) {
+    return defaultVariant.main_image
+  }
+
+  // Fallback to placeholder
+  return '/images/placeholder-product.jpg'
 })
 
-const canIncrement = computed(() => quantity.value < props.product?.total_stock)
-const canAddToCart = computed(() =>
-  props.product?.has_stock &&
-  selectedSize.value &&
-  quantity.value > 0 &&
-  quantity.value <= props.product?.total_stock
-)
+const availableImages = computed(() => {
+  // If a variant is selected and has images, use variant images
+  if (selectedVariant.value && selectedVariant.value.has_images) {
+    return selectedVariant.value.image_urls
+  }
+
+  // If no variant selected, try to get default variant images
+  const defaultVariant = availableVariants.value.find(v => v.is_default && v.has_images)
+  if (defaultVariant) {
+    return defaultVariant.image_urls
+  }
+
+  // Fallback to placeholder
+  return ['/images/placeholder-product.jpg']
+})
+
+const canIncrement = computed(() => {
+  if (selectedVariant.value) {
+    return quantity.value < selectedVariant.value.stock
+  }
+  return quantity.value < props.product?.total_stock
+})
+
+const canAddToCart = computed(() => {
+  if (!props.product?.has_stock) return false
+
+  if (selectedVariant.value) {
+    return selectedVariant.value.stock > 0 && quantity.value > 0 && quantity.value <= selectedVariant.value.stock
+  }
+
+  return selectedSize.value && selectedColor.value && quantity.value > 0 && quantity.value <= props.product?.total_stock
+})
 
 const availableSizes = computed(() => {
   return props.product?.available_sizes || []
+})
+
+const availableColors = computed(() => {
+  return props.product?.available_colors || []
+})
+
+const availableVariants = computed(() => {
+  return props.product?.variants?.filter(v => v.is_active && v.stock > 0) || []
+})
+
+const selectedPrice = computed(() => {
+  if (selectedVariant.value) {
+    const basePrice = parseFloat(props.product.price) || 0
+    const priceAdjustment = parseFloat(selectedVariant.value.price_adjustment) || 0
+    return (basePrice + priceAdjustment).toFixed(2)
+  }
+  return props.product?.final_price || props.product?.price
 })
 
 // Handle image load errors
@@ -77,6 +132,39 @@ function selectImage(index) {
   currentImageIndex.value = index
 }
 
+function selectVariant(variant) {
+  selectedVariant.value = variant
+  selectedSize.value = variant.size
+  selectedColor.value = variant.color
+  currentImageIndex.value = 0 // Reset to first image
+}
+
+function selectColor(color) {
+  selectedColor.value = color
+  selectedSize.value = "" // Reset size when color changes
+  selectedVariant.value = null // Reset variant when color changes
+
+  // Find the first available variant with this color to auto-select if only one size
+  const variantsWithColor = availableVariants.value.filter(v => v.color === color && v.stock > 0)
+  if (variantsWithColor.length === 1) {
+    selectVariant(variantsWithColor[0])
+  }
+}
+
+function selectSize(size) {
+  selectedSize.value = size
+  // Find variant with this size and current color
+  const variant = availableVariants.value.find(v =>
+    v.size === size &&
+    v.color === selectedColor.value
+  )
+  if (variant) {
+    selectVariant(variant)
+  } else {
+    selectedVariant.value = null
+  }
+}
+
 function handleAddToCart() {
   if (!canAddToCart.value) return
 
@@ -86,16 +174,18 @@ function handleAddToCart() {
   const cartItem = {
     id: props.product.id,
     name: props.product.name,
-    price: props.product.final_price || props.product.price,
+    price: parseFloat(selectedPrice.value),
     originalPrice: props.product.discount > 0 ? props.product.price : null,
     image: currentImage.value,
-    size: selectedSize.value,
+    size: selectedVariant.value?.size || selectedSize.value,
+    color: selectedVariant.value?.color || selectedColor.value,
     inStock: props.product.has_stock,
-    stockQuantity: props.product.total_stock,
+    stockQuantity: selectedVariant.value?.stock || props.product.total_stock,
     rating: props.product.rating,
     reviews: props.product.reviews_count,
     category: props.product.category?.name,
-    brand: props.product.brand?.name
+    brand: props.product.brand?.name,
+    variantId: selectedVariant.value?.id
   }
 
   addToCart(cartItem, quantity.value)
@@ -118,9 +208,23 @@ function toggleFavorite() {
 
 // Lifecycle
 onMounted(() => {
-  // Auto-select first size if only one available
-  if (availableSizes.value.length === 1) {
-    selectedSize.value = availableSizes.value[0]
+  // Auto-select first available color to show photos
+  if (availableColors.value.length > 0 && !selectedColor.value) {
+    selectColor(availableColors.value[0])
+  }
+
+  // Auto-select default variant if available
+  const defaultVariant = props.product?.variants?.find(v => v.is_default && v.is_active && v.stock > 0)
+  if (defaultVariant) {
+    selectVariant(defaultVariant)
+  } else if (availableSizes.value.length === 1 && availableColors.value.length === 1) {
+    // Auto-select if only one size and color available
+    const variant = availableVariants.value.find(v =>
+      v.size === availableSizes.value[0] && v.color === availableColors.value[0]
+    )
+    if (variant) {
+      selectVariant(variant)
+    }
   }
 })
 </script>
@@ -164,194 +268,38 @@ onMounted(() => {
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-12">
-          <!-- Product Images -->
-          <div class="space-y-4">
-            <div class="aspect-square rounded-lg overflow-hidden bg-card border shadow-sm">
-              <img
-                :src="currentImage"
-                :alt="product.name"
-                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                @error="handleImageError"
-              />
-            </div>
-            <div v-if="product.images && product.images.length > 1" class="grid grid-cols-4 gap-2">
-              <div
-                v-for="(img, i) in product.images"
-                :key="i"
-                class="aspect-square rounded-lg overflow-hidden bg-card cursor-pointer border-2 transition-all duration-200"
-                :class="currentImageIndex === i ? 'border-primary' : 'border-transparent hover:border-muted-foreground/20'"
-                @click="selectImage(i)"
-              >
-                <img
-                  :src="`${img}`"
-                  :alt="`${product.name} view ${i + 1}`"
-                  class="w-full h-full object-cover"
-                  @error="handleImageError"
-                />
-              </div>
-            </div>
-          </div>
+          <!-- Product Images Section -->
+          <ProductImages
+            :current-image="currentImage"
+            :available-images="availableImages"
+            :current-image-index="currentImageIndex"
+            :product-name="product.name"
+            @select-image="selectImage"
+            @image-error="handleImageError"
+          />
 
-          <!-- Product Info -->
-          <div class="space-y-6">
-            <div>
-              <div class="flex items-center gap-2 mb-3">
-                <Badge v-if="product.is_featured" variant="secondary">Featured</Badge>
-                <Badge v-if="product.discount > 0" class="bg-destructive text-destructive-foreground">
-                  -{{ product.discount_percentage }}%
-                </Badge>
-                <Badge v-if="!product.has_stock" variant="destructive">Out of Stock</Badge>
-              </div>
-              <h1 class="text-3xl font-bold mb-3">{{ product.name }}</h1>
-              <div class="flex items-center gap-2 mb-4">
-                <div class="flex items-center">
-                  <Star
-                    v-for="i in 5"
-                    :key="i"
-                    class="h-4 w-4"
-                    :class="i <= Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'"
-                  />
-                </div>
-                <span class="text-sm text-muted-foreground">
-                  {{ product.rating }} ({{ product.reviews_count }} reviews)
-                </span>
-              </div>
-            </div>
-
-            <!-- Price -->
-            <div class="flex items-center gap-2">
-              <span class="text-3xl font-bold text-primary">${{ (product.final_price || product.price) }}</span>
-              <span v-if="product.discount > 0" class="text-lg text-muted-foreground line-through">
-                ${{ product.price }}
-              </span>
-            </div>
-
-            <!-- Stock status -->
-            <div class="flex items-center gap-2 text-sm">
-              <div class="flex items-center gap-1">
-                <div class="w-2 h-2 rounded-full" :class="product.has_stock ? 'bg-green-500' : 'bg-red-500'"></div>
-                <span :class="product.has_stock ? 'text-green-600' : 'text-red-600'">
-                  {{ product.has_stock ? `${product.total_stock} in stock` : 'Out of stock' }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Description -->
-            <p class="text-muted-foreground leading-relaxed">{{ product.description }}</p>
-
-            <!-- Sizes -->
-            <div v-if="availableSizes.length > 0">
-              <h3 class="font-semibold mb-3">Size</h3>
-              <div class="flex flex-wrap gap-2">
-                <Button
-                  v-for="size in availableSizes"
-                  :key="size"
-                  :variant="selectedSize === size ? 'default' : 'outline'"
-                  size="sm"
-                  class="min-w-16"
-                  @click="selectedSize = size"
-                >
-                  {{ size }}
-                </Button>
-              </div>
-              <p v-if="!selectedSize" class="text-sm text-muted-foreground mt-2">
-                Please select a size
-              </p>
-            </div>
-
-            <!-- Quantity -->
-            <div>
-              <h3 class="font-semibold mb-3">Quantity</h3>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center border rounded-md">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="h-10 w-10"
-                    @click="decrementQuantity"
-                    :disabled="quantity <= 1"
-                  >
-                    <Minus class="h-4 w-4" />
-                  </Button>
-                  <span class="px-4 py-2 min-w-12 text-center font-medium">{{ quantity }}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="h-10 w-10"
-                    @click="incrementQuantity"
-                    :disabled="!canIncrement"
-                  >
-                    <Plus class="h-4 w-4" />
-                  </Button>
-                </div>
-                <span class="text-sm text-muted-foreground">
-                  Max: {{ product.total_stock }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex gap-3">
-              <Button
-                class="flex-1"
-                size="lg"
-                :disabled="!canAddToCart"
-                @click="handleAddToCart"
-              >
-                <ShoppingCart class="h-5 w-5 mr-2" />
-                {{ product.has_stock ? 'Add to Cart' : 'Out of Stock' }}
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                @click="toggleFavorite"
-                :class="isFavorite ? 'text-destructive border-destructive hover:bg-destructive/10' : ''"
-              >
-                <Heart class="h-5 w-5" :class="isFavorite ? 'fill-current' : ''" />
-              </Button>
-            </div>
-
-            <!-- Validation messages -->
-            <div v-if="!selectedSize && availableSizes.length > 0" class="flex items-center gap-2 text-sm text-amber-600">
-              <AlertCircle class="h-4 w-4" />
-              <span>Please select a size to add to cart</span>
-            </div>
-
-            <!-- Features -->
-            <Card class="border-0 shadow-sm">
-              <CardContent class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                  <div class="flex flex-col items-center gap-3">
-                    <div class="p-3 bg-primary/10 rounded-full">
-                      <Truck class="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <div class="font-semibold">Free Shipping</div>
-                      <div class="text-sm text-muted-foreground">On orders over $100</div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-3">
-                    <div class="p-3 bg-primary/10 rounded-full">
-                      <Shield class="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <div class="font-semibold">2 Year Warranty</div>
-                      <div class="text-sm text-muted-foreground">Official warranty</div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-3">
-                    <div class="p-3 bg-primary/10 rounded-full">
-                      <RotateCcw class="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <div class="font-semibold">30-Day Returns</div>
-                      <div class="text-sm text-muted-foreground">Easy returns</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <!-- Product Info Section -->
+          <ProductInfo
+            :product="product"
+            :selected-price="selectedPrice"
+            :selected-variant="selectedVariant"
+            :available-sizes="availableSizes"
+            :available-colors="availableColors"
+            :available-variants="availableVariants"
+            :selected-size="selectedSize"
+            :selected-color="selectedColor"
+            :quantity="quantity"
+            :can-increment="canIncrement"
+            :can-add-to-cart="canAddToCart"
+            :is-favorite="isFavorite"
+            @select-size="selectSize"
+            @select-color="selectColor"
+            @select-variant="selectVariant"
+            @increment-quantity="incrementQuantity"
+            @decrement-quantity="decrementQuantity"
+            @add-to-cart="handleAddToCart"
+            @toggle-favorite="toggleFavorite"
+          />
         </div>
 
         <!-- Related Products -->
@@ -366,7 +314,7 @@ onMounted(() => {
               <Link :href="`/products/${relatedProduct.id}`">
                 <div class="aspect-square overflow-hidden">
                   <img
-                    :src="relatedProduct.images && relatedProduct.images.length > 0 ? `${relatedProduct.images[0]}` : '/images/placeholder-product.svg'"
+                    :src="relatedProduct.main_image || '/images/placeholder-product.jpg'"
                     :alt="relatedProduct.name"
                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     @error="handleImageError"

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\WebsiteSetting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -65,6 +66,9 @@ class WelcomeController extends Controller
             'average_rating' => 4.8, // This would come from a reviews table in the future
         ];
 
+        // Get website settings
+        $websiteSettings = WebsiteSetting::getAllAsArray();
+
         return Inertia::render('Welcome', [
             'featuredProducts' => $featuredProducts,
             'popularCategories' => $popularCategories,
@@ -72,6 +76,7 @@ class WelcomeController extends Controller
             'latestProducts' => $latestProducts,
             'saleProducts' => $saleProducts,
             'stats' => $stats,
+            'websiteSettings' => $websiteSettings,
         ]);
     }
 }

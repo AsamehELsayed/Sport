@@ -154,7 +154,20 @@ class InvoiceController extends Controller
             'invoice' => $invoice,
         ]);
 
-        return $pdf->download("invoice-{$invoice->invoice_number}.pdf");
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Helvetica',
+        ]);
+
+        $filename = "invoice-{$invoice->invoice_number}.pdf";
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($pdf->output()),
+        ]);
     }
 
     public function previewPdf(Invoice $invoice)
@@ -165,7 +178,20 @@ class InvoiceController extends Controller
             'invoice' => $invoice,
         ]);
 
-        return $pdf->stream("invoice-{$invoice->invoice_number}.pdf");
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Helvetica',
+        ]);
+
+        $filename = "invoice-{$invoice->invoice_number}.pdf";
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Content-Length' => strlen($pdf->output()),
+        ]);
     }
 
     public function sendInvoice(Invoice $invoice)

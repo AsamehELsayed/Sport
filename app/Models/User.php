@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -37,6 +38,13 @@ class User extends Authenticatable
         'marketing_emails',
         'order_updates',
         'preferred_sports',
+        'timezone',
+        'page_name',
+        'website_name',
+        'logo_path',
+        'primary_color',
+        'secondary_color',
+        'accent_color',
     ];
 
     /**
@@ -81,6 +89,35 @@ class User extends Authenticatable
     public function wishlistedProducts()
     {
         return $this->belongsToMany(Product::class, 'wishlists');
+    }
+
+    /**
+     * Get the customer groups that this user belongs to.
+     */
+    public function customerGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(CustomerGroup::class, 'customer_group_user')
+            ->withTimestamps();
+    }
+
+    public function emailSettings(): HasMany
+    {
+        return $this->hasMany(EmailSetting::class);
+    }
+
+    public function emailTemplates(): HasMany
+    {
+        return $this->hasMany(EmailTemplate::class);
+    }
+
+    public function emailCampaigns(): HasMany
+    {
+        return $this->hasMany(EmailCampaign::class);
+    }
+
+    public function campaignRecipients(): HasMany
+    {
+        return $this->hasMany(EmailCampaignRecipient::class, 'recipient_id');
     }
 
     public function getImageAttribute($value){

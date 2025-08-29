@@ -147,8 +147,24 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
+        // Add computed attributes to related products
+        $relatedProducts->each(function ($relatedProduct) {
+            $relatedProduct->main_image = $relatedProduct->main_image;
+            $relatedProduct->final_price = $relatedProduct->final_price;
+            $relatedProduct->has_stock = $relatedProduct->has_stock;
+            $relatedProduct->rating = $relatedProduct->rating;
+            $relatedProduct->reviews_count = $relatedProduct->reviews_count;
+        });
+
+        // Add variant images and default variant info
+        $product->variants->each(function ($variant) {
+            $variant->main_image = $variant->main_image;
+            $variant->image_urls = $variant->image_urls;
+            $variant->has_images = $variant->has_images;
+        });
+
         return Inertia::render('guest/products/show', [
-            'product' => $product->append('has_stock' , 'total_stock'),
+            'product' => $product->append(['has_stock', 'total_stock', 'available_sizes', 'available_colors']),
             'relatedProducts' => $relatedProducts,
         ]);
     }

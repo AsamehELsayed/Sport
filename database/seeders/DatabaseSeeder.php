@@ -17,8 +17,10 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             BrandSeeder::class,
             ProductSeeder::class,
+            CustomerGroupSeeder::class,
             OrderSeeder::class,
             InvoiceSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
     }
 }

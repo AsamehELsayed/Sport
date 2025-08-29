@@ -64,7 +64,7 @@ const getCategoryIcon = (categoryName) => {
             <!-- Content -->
             <div class="relative z-10">
               <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {{ getCategoryIcon(category.name) }}
+                {{category.icon }}
               </div>
               <h3 class="font-semibold text-foreground mb-3 group-hover:text-primary transition-colors text-lg">
                 {{ category.name }}

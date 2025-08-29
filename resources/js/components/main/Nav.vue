@@ -4,6 +4,7 @@ import { Link, usePage, router } from "@inertiajs/vue3"; // For navigation with 
 import { Zap, Search, ShoppingCart, User, Menu, Heart, LogOut, Settings } from "lucide-vue-next"; // install: npm i lucide-vue-next
 import { useCart } from "@/composables/useCart";
 import { useWishlist } from "@/composables/useWishlist";
+import { useAppearance } from "@/composables/useAppearance";
 
 const isMenuOpen = ref(false);
 const { itemCount } = useCart();
@@ -13,6 +14,9 @@ const { wishlistCount, getWishlistCount } = useWishlist();
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const isAuthenticated = computed(() => !!user.value);
+
+// Get appearance settings
+const { appearance } = useAppearance();
 
 // Close dropdown when clicking outside
 onMounted(() => {
@@ -43,10 +47,13 @@ const logout = () => {
 
         <!-- Logo -->
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-yellow-500 rounded-lg flex items-center justify-center">
+          <div v-if="appearance.logo_path" class="w-8 h-8 rounded-lg overflow-hidden">
+            <img :src="'/storage/' + appearance.logo_path" alt="Logo" class="w-full h-full object-cover" />
+          </div>
+          <div v-else class="w-8 h-8 bg-gradient-to-r from-red-500 to-yellow-500 rounded-lg flex items-center justify-center">
             <Zap class="w-5 h-5 text-white" />
           </div>
-          <span class="text-xl font-bold text-foreground">NitroSports</span>
+          <span class="text-xl font-bold text-foreground">{{ appearance.website_name || 'SportApp' }}</span>
         </div>
 
         <!-- Search Bar - Hidden on mobile -->
@@ -86,7 +93,7 @@ const logout = () => {
             <ShoppingCart class="w-5 h-5" />
             <span
               v-if="itemCount > 0"
-              class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full text-xs bg-primary text-red-500 font-bold"
+              class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full text-xs bg-red-500 text-white font-bold"
             >
               {{ itemCount }}
             </span>

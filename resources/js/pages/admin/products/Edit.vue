@@ -22,35 +22,58 @@ const props = defineProps({
   brands: Array
 })
 
-const form = useForm({
-  name: props.product?.name || '',
-  description: props.product?.description || '',
-  price: props.product?.price || '',
-  images: props.product?.images || [],
-  category_id: props.product?.category_id || '',
+const selectedDefaultIndex = ref(0)
+
+  const form = useForm({
+    name: props.product?.name || '',
+    description: props.product?.description || '',
+    price: props.product?.price || '',
+    category_id: props.product?.category_id || '',
   brand_id: props.product?.brand_id || '',
   sku: props.product?.sku || '',
   is_active: props.product?.is_active ?? true,
   is_featured: props.product?.is_featured ?? false,
   discount: props.product?.discount || 0,
-  variants: props.product?.variants?.map(v => ({
-    id: v.id,
-    size: v.size,
-    color: v.color,
-    stock: v.stock,
-    sku: v.sku,
-    price_adjustment: v.price_adjustment || 0,
-  })) || [
-    { size: '', color: '', stock: 0, sku: '', price_adjustment: 0 }
+  variants: props.product?.variants?.map((v, index) => {
+    if (v.is_default) {
+      selectedDefaultIndex.value = index
+    }
+    return {
+      id: v.id,
+      size: v.size,
+      color: v.color,
+      stock: v.stock,
+      sku: v.sku,
+      price_adjustment: v.price_adjustment || 0,
+      is_default: v.is_default ?? false,
+      images: v.images || [],
+    }
+  }) || [
+    { size: '', color: '', stock: 0, sku: '', price_adjustment: 0, is_default: true, images: [] }
   ]
 })
 
 const addVariant = () => {
-  form.variants.push({ size: '', color: '', stock: 0, sku: '', price_adjustment: 0 })
+  form.variants.push({ size: '', color: '', stock: 0, sku: '', price_adjustment: 0, is_default: false, images: [] })
 }
 
 const removeVariant = (index) => {
   form.variants.splice(index, 1)
+  // Adjust selected default index if needed
+  if (selectedDefaultIndex.value >= form.variants.length) {
+    selectedDefaultIndex.value = form.variants.length - 1
+  }
+  // Update default flags
+  form.variants.forEach((variant, i) => {
+    variant.is_default = i === selectedDefaultIndex.value
+  })
+}
+
+const setDefaultVariant = (index) => {
+  selectedDefaultIndex.value = index
+  form.variants.forEach((variant, i) => {
+    variant.is_default = i === index
+  })
 }
 
 const handleImageError = (error) => {
@@ -159,20 +182,19 @@ const submit = () => {
         </CardContent>
       </Card>
 
-      <!-- Product Images -->
+      <!-- Product Images - Now handled by variants -->
       <Card>
         <CardHeader>
           <CardTitle>Product Images</CardTitle>
-          <CardDescription>Upload multiple images for your product</CardDescription>
+          <CardDescription>Images are now managed through variants. Upload images for each variant below.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ImageUpload
-            v-model="form.images"
-            :multiple="true"
-            :max-files="5"
-            @error="handleImageError"
-          />
-          <p v-if="form.errors.images" class="text-sm text-destructive mt-2">{{ form.errors.images }}</p>
+          <div class="p-4 bg-muted/50 rounded-lg">
+            <p class="text-sm text-muted-foreground">
+              Product images are automatically generated from the default variant.
+              Please upload images for each variant in the Variants section below.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -180,22 +202,35 @@ const submit = () => {
       <Card>
         <CardHeader>
           <CardTitle>Product Variants</CardTitle>
-          <CardDescription>Add different sizes and colors with individual stock levels</CardDescription>
+          <CardDescription>Add different sizes and colors with individual stock levels and images</CardDescription>
         </CardHeader>
         <CardContent>
           <div class="space-y-4">
             <div v-for="(variant, index) in form.variants" :key="index" class="border border-border rounded-lg p-4">
               <div class="flex items-center justify-between mb-4">
                 <h4 class="font-medium">Variant {{ index + 1 }}</h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  @click="removeVariant(index)"
-                  :disabled="form.variants.length === 1"
-                >
-                  Remove
-                </Button>
+                                  <div class="flex items-center gap-2">
+                    <label class="flex items-center space-x-2">
+                      <input
+                        v-model="selectedDefaultIndex"
+                        type="radio"
+                        :name="'default_variant'"
+                        :value="index"
+                        @change="setDefaultVariant(index)"
+                        class="rounded border-border"
+                      />
+                      <span class="text-sm font-medium text-foreground">Default</span>
+                    </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="removeVariant(index)"
+                    :disabled="form.variants.length === 1"
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -221,9 +256,20 @@ const submit = () => {
                 </div>
               </div>
 
-              <div class="mt-2">
+              <div class="mt-4">
                 <label class="block text-sm font-medium text-foreground mb-2">Variant SKU</label>
                 <Input v-model="variant.sku" placeholder="Optional variant-specific SKU" />
+              </div>
+
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-foreground mb-2">Variant Images</label>
+                <ImageUpload
+                  v-model="variant.images"
+                  :multiple="true"
+                  :max-files="3"
+                  @error="handleImageError"
+                />
+                <p class="text-xs text-muted-foreground mt-1">Upload specific images for this variant (optional)</p>
               </div>
             </div>
 

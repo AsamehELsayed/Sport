@@ -14,16 +14,20 @@ class ProductVariant extends Model
         'product_id',
         'size',
         'color',
+        'images',
         'sku',
         'stock',
         'price_adjustment',
         'is_active',
+        'is_default',
     ];
 
     protected $casts = [
         'stock' => 'integer',
         'price_adjustment' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_default' => 'boolean',
+        'images' => 'array',
     ];
 
     // Relationships
@@ -68,6 +72,30 @@ class ProductVariant extends Model
         return implode(' - ', $parts) ?: 'Default';
     }
 
+    // Image handling methods
+    public function getMainImageAttribute(): string
+    {
+        if ($this->images && count($this->images) > 0) {
+            return asset('storage/' . $this->images[0]);
+        }
+        return asset('images/placeholder-product.jpg');
+    }
+
+    public function getImageUrlsAttribute(): array
+    {
+        if ($this->images && count($this->images) > 0) {
+            return array_map(function($image) {
+                return asset('storage/' . $image);
+            }, $this->images);
+        }
+        return [asset('images/placeholder-product.jpg')];
+    }
+
+    public function getHasImagesAttribute(): bool
+    {
+        return $this->images && count($this->images) > 0;
+    }
+
     // Scopes
     public function scopeInStock($query)
     {
@@ -77,5 +105,10 @@ class ProductVariant extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeDefault($query)
+    {
+        return $query->where('is_default', true);
     }
 }

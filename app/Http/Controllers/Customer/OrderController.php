@@ -57,6 +57,8 @@ class OrderController extends Controller
             'items.*.price' => 'required|numeric|min:0',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.size' => 'nullable|string',
+            'items.*.color' => 'nullable|string',
+            'items.*.variantId' => 'nullable|integer',
             'subtotal' => 'required|numeric|min:0',
             'tax' => 'required|numeric|min:0',
             'shipping' => 'required|numeric|min:0',
@@ -88,12 +90,14 @@ class OrderController extends Controller
         foreach ($request->items as $item) {
             OrderItem::create([
                 'order_id' => $order->id,
+                'product_id' => $item['id'],
                 'product_name' => $item['name'],
                 'product_sku' => $item['id'],
                 'price' => $item['price'],
                 'quantity' => $item['quantity'],
                 'subtotal' => $item['price'] * $item['quantity'],
                 'size' => $item['size'] ?? null,
+                'color' => $item['color'] ?? null,
             ]);
         }
 

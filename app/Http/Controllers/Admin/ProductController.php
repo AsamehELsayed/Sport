@@ -40,37 +40,28 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'sku' => 'nullable|string|unique:products,sku',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'discount' => 'nullable|numeric|min:0',
-            'variants' => 'required|array|min:1',
-            'variants.*.size' => 'required|string',
-            'variants.*.color' => 'nullable|string',
-            'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.sku' => 'nullable|string',
-            'variants.*.price_adjustment' => 'nullable|numeric',
+            'colorGroups' => 'required|array|min:1',
+            'colorGroups.*.color' => 'required|string',
+            'colorGroups.*.sizes' => 'required|array|min:1',
+            'colorGroups.*.sizes.*.size' => 'required|string',
+            'colorGroups.*.sizes.*.stock' => 'required|integer|min:0',
+            'colorGroups.*.sizes.*.price_adjustment' => 'nullable|numeric',
+            'colorGroups.*.images' => 'nullable|array',
+            'colorGroups.*.images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Handle image uploads
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
-                $imagePaths[] = $path;
-            }
-        }
-
-        // Create product
+        // Create product (no main product images)
         $product = Product::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'price' => $validated['price'],
-            'images' => $imagePaths,
+            'images' => [], // No main product images
             'category_id' => $validated['category_id'],
             'brand_id' => $validated['brand_id'],
             'sku' => $validated['sku'],
@@ -79,16 +70,39 @@ class ProductController extends Controller
             'discount' => $validated['discount'] ?? 0,
         ]);
 
-        // Create variants
-        foreach ($validated['variants'] as $variantData) {
-            $product->variants()->create([
-                'size' => $variantData['size'],
-                'color' => $variantData['color'],
-                'stock' => $variantData['stock'],
-                'sku' => $variantData['sku'],
-                'price_adjustment' => $variantData['price_adjustment'] ?? 0,
-                'is_active' => true,
-            ]);
+        // Create variants from color groups
+        $hasDefault = false;
+        foreach ($validated['colorGroups'] as $colorGroupIndex => $colorGroupData) {
+            // Handle color group image uploads
+            $colorImagePaths = [];
+            if (isset($colorGroupData['images']) && is_array($colorGroupData['images'])) {
+                foreach ($colorGroupData['images'] as $image) {
+                    if ($image instanceof \Illuminate\Http\UploadedFile) {
+                        $path = $image->store('product-variants', 'public');
+                        $colorImagePaths[] = $path;
+                    }
+                }
+            }
+
+            // Create variants for each size in this color
+            foreach ($colorGroupData['sizes'] as $sizeIndex => $sizeData) {
+                // Set first variant as default if no default is set yet
+                $isDefault = !$hasDefault && $colorGroupIndex === 0 && $sizeIndex === 0;
+                if ($isDefault) {
+                    $hasDefault = true;
+                }
+
+                $product->variants()->create([
+                    'size' => $sizeData['size'],
+                    'color' => $colorGroupData['color'],
+                    'images' => $colorImagePaths, // Same images for all sizes of this color
+                    'stock' => $sizeData['stock'],
+                    'sku' => null, // Optional: generate SKU if needed
+                    'price_adjustment' => $sizeData['price_adjustment'] ?? 0,
+                    'is_active' => true,
+                    'is_default' => $isDefault,
+                ]);
+            }
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully');
@@ -122,38 +136,28 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'sku' => 'nullable|string|unique:products,sku,' . $product->id,
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'discount' => 'nullable|numeric|min:0',
-            'variants' => 'required|array|min:1',
-            'variants.*.id' => 'nullable|exists:product_variants,id',
-            'variants.*.size' => 'required|string',
-            'variants.*.color' => 'nullable|string',
-            'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.sku' => 'nullable|string',
-            'variants.*.price_adjustment' => 'nullable|numeric',
+            'colorGroups' => 'required|array|min:1',
+            'colorGroups.*.color' => 'required|string',
+            'colorGroups.*.sizes' => 'required|array|min:1',
+            'colorGroups.*.sizes.*.size' => 'required|string',
+            'colorGroups.*.sizes.*.stock' => 'required|integer|min:0',
+            'colorGroups.*.sizes.*.price_adjustment' => 'nullable|numeric',
+            'colorGroups.*.images' => 'nullable|array',
+            'colorGroups.*.images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Handle image uploads
-        $imagePaths = $product->images ?? [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
-                $imagePaths[] = $path;
-            }
-        }
-
-        // Update product
+        // Update product (no main product images)
         $product->update([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'price' => $validated['price'],
-            'images' => $imagePaths,
+            'images' => [], // No main product images
             'category_id' => $validated['category_id'],
             'brand_id' => $validated['brand_id'],
             'sku' => $validated['sku'],
@@ -162,38 +166,43 @@ class ProductController extends Controller
             'discount' => $validated['discount'] ?? 0,
         ]);
 
-        // Update variants
-        $variantIds = [];
-        foreach ($validated['variants'] as $variantData) {
-            if (isset($variantData['id'])) {
-                // Update existing variant
-                $variant = $product->variants()->find($variantData['id']);
-                if ($variant) {
-                    $variant->update([
-                        'size' => $variantData['size'],
-                        'color' => $variantData['color'],
-                        'stock' => $variantData['stock'],
-                        'sku' => $variantData['sku'],
-                        'price_adjustment' => $variantData['price_adjustment'] ?? 0,
-                    ]);
-                    $variantIds[] = $variant->id;
+        // Delete all existing variants and recreate from color groups
+        $product->variants()->delete();
+
+        // Create variants from color groups
+        $hasDefault = false;
+        foreach ($validated['colorGroups'] as $colorGroupIndex => $colorGroupData) {
+            // Handle color group image uploads
+            $colorImagePaths = [];
+            if (isset($colorGroupData['images']) && is_array($colorGroupData['images'])) {
+                foreach ($colorGroupData['images'] as $image) {
+                    if ($image instanceof \Illuminate\Http\UploadedFile) {
+                        $path = $image->store('product-variants', 'public');
+                        $colorImagePaths[] = $path;
+                    }
                 }
-            } else {
-                // Create new variant
-                $variant = $product->variants()->create([
-                    'size' => $variantData['size'],
-                    'color' => $variantData['color'],
-                    'stock' => $variantData['stock'],
-                    'sku' => $variantData['sku'],
-                    'price_adjustment' => $variantData['price_adjustment'] ?? 0,
+            }
+
+            // Create variants for each size in this color
+            foreach ($colorGroupData['sizes'] as $sizeIndex => $sizeData) {
+                // Set first variant as default if no default is set yet
+                $isDefault = !$hasDefault && $colorGroupIndex === 0 && $sizeIndex === 0;
+                if ($isDefault) {
+                    $hasDefault = true;
+                }
+
+                $product->variants()->create([
+                    'size' => $sizeData['size'],
+                    'color' => $colorGroupData['color'],
+                    'images' => $colorImagePaths, // Same images for all sizes of this color
+                    'stock' => $sizeData['stock'],
+                    'sku' => null, // Optional: generate SKU if needed
+                    'price_adjustment' => $sizeData['price_adjustment'] ?? 0,
                     'is_active' => true,
+                    'is_default' => $isDefault,
                 ]);
-                $variantIds[] = $variant->id;
             }
         }
-
-        // Remove variants that are no longer in the list
-        $product->variants()->whereNotIn('id', $variantIds)->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
     }

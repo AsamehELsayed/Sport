@@ -199,6 +199,11 @@ interface ProductVariant {
   stock: number
   price_adjustment: number
   is_active: boolean
+  is_default?: boolean
+  images?: string[]
+  main_image?: string
+  image_urls?: string[]
+  has_images?: boolean
 }
 
 interface Product {
@@ -236,12 +241,14 @@ const isAuthenticated = computed(() => !!user.value)
 // Local state
 const selectedSize = ref('')
 const selectedColor = ref('')
+const selectedVariant = ref(null)
 const quantity = ref(1)
 const isLoading = ref(false)
 const sizeError = ref(false)
 const colorError = ref(false)
 const fullProduct = ref<Product | null>(null)
 const isFetchingProduct = ref(false)
+const currentImageIndex = ref(0)
 
 // Computed properties
 const hasAnyVariants = computed(() => {
@@ -292,14 +299,29 @@ const availableColors = computed(() => {
     .filter(Boolean))]
 })
 
-const selectedVariant = computed(() => {
-  if (!props.product?.variants) return null
+const availableVariants = computed(() => {
+  const variants = fullProduct.value?.variants || props.product?.variants || []
+  return variants.filter((v: any) => v.is_active && v.stock > 0)
+})
 
-  return props.product.variants.find(variant =>
-    variant.stock > 0 &&
-    variant.size === selectedSize.value &&
-    (selectedColor.value ? variant.color === selectedColor.value : true)
-  )
+const currentImage = computed(() => {
+  // If a variant is selected and has images, use variant image
+  if (selectedVariant.value && selectedVariant.value.has_images) {
+    return selectedVariant.value.main_image
+  }
+
+  // Otherwise use product image
+  return props.product?.image || '/images/placeholder-product.svg'
+})
+
+const availableImages = computed(() => {
+  // If a variant is selected and has images, use variant images
+  if (selectedVariant.value && selectedVariant.value.has_images) {
+    return selectedVariant.value.image_urls || []
+  }
+
+  // Otherwise return empty array (no additional images)
+  return []
 })
 
 const selectedPrice = computed(() => {
@@ -426,6 +448,41 @@ const validateSelection = () => {
   return !sizeError.value && !colorError.value
 }
 
+const selectVariant = (variant) => {
+  selectedVariant.value = variant
+  selectedSize.value = variant.size
+  selectedColor.value = variant.color
+  currentImageIndex.value = 0 // Reset to first image
+}
+
+const selectSize = (size) => {
+  selectedSize.value = size
+  // Find variant with this size and current color
+  const variant = availableVariants.value.find(v =>
+    v.size === size &&
+    (selectedColor.value ? v.color === selectedColor.value : true)
+  )
+  if (variant) {
+    selectVariant(variant)
+  } else {
+    selectedVariant.value = null
+  }
+}
+
+const selectColor = (color) => {
+  selectedColor.value = color
+  // Find variant with this color and current size
+  const variant = availableVariants.value.find(v =>
+    v.color === color &&
+    (selectedSize.value ? v.size === selectedSize.value : true)
+  )
+  if (variant) {
+    selectVariant(variant)
+  } else {
+    selectedVariant.value = null
+  }
+}
+
 const handleAddToCart = async () => {
   if (!validateSelection() || !canAddToCart.value) return
 
@@ -437,14 +494,16 @@ const handleAddToCart = async () => {
       name: props.product!.name,
       price: parseFloat(selectedPrice.value),
       originalPrice: props.product!.original_price || undefined,
-      image: props.product!.image,
-      size: selectedSize.value || 'N/A',
-      color: selectedColor.value || 'N/A',
+      image: currentImage.value,
+      size: selectedVariant.value?.size || selectedSize.value || 'N/A',
+      color: selectedVariant.value?.color || selectedColor.value || 'N/A',
       inStock: hasStock.value,
-      stockQuantity: maxQuantity.value,
+      stockQuantity: selectedVariant.value?.stock || maxQuantity.value,
       rating: 0,
       reviews: 0,
-      category: props.product!.category || ''
+      category: props.product!.category || '',
+      brand: props.product!.brand || '',
+      variantId: selectedVariant.value?.id
     }
 
     addToCart(cartItem, quantity.value)

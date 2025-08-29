@@ -21,10 +21,7 @@ const props = defineProps({
 const currentImageIndex = ref(0)
 
 const currentImage = computed(() => {
-  if (props.product?.images && props.product.images.length > 0) {
-    return `${props.product.images[currentImageIndex.value]}`
-  }
-  return '/images/placeholder-product.jpg'
+  return props.product?.main_image || '/images/placeholder-product.jpg'
 })
 
 const totalStock = computed(() => {
@@ -77,21 +74,12 @@ const selectImage = (index) => {
                 />
               </div>
 
-              <!-- Thumbnail Gallery -->
-              <div v-if="product?.images && product.images.length > 1" class="grid grid-cols-4 gap-2">
-                <div
-                  v-for="(image, index) in product.images"
-                  :key="index"
-                  class="aspect-square rounded-lg overflow-hidden bg-card cursor-pointer border-2 transition-all duration-200"
-                  :class="currentImageIndex === index ? 'border-primary' : 'border-transparent hover:border-muted-foreground/20'"
-                  @click="selectImage(index)"
-                >
-                  <img
-                    :src="`${image}`"
-                    :alt="`${product?.name} view ${index + 1}`"
-                    class="w-full h-full object-cover"
-                  />
-                </div>
+              <!-- Note: Images are now managed through variants -->
+              <div class="p-4 bg-muted/50 rounded-lg">
+                <p class="text-sm text-muted-foreground text-center">
+                  Product images are now managed through variants.
+                  Please view the variants section below to see available images.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -172,16 +160,27 @@ const selectImage = (index) => {
                 <table class="w-full">
                   <thead>
                     <tr class="border-b">
+                      <th class="text-left p-2 font-medium">Image</th>
                       <th class="text-left p-2 font-medium">Size</th>
                       <th class="text-left p-2 font-medium">Color</th>
                       <th class="text-left p-2 font-medium">Stock</th>
                       <th class="text-left p-2 font-medium">SKU</th>
                       <th class="text-left p-2 font-medium">Price Adjustment</th>
+                      <th class="text-left p-2 font-medium">Default</th>
                       <th class="text-left p-2 font-medium">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="variant in product?.variants" :key="variant.id" class="border-b">
+                      <td class="p-2">
+                        <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                          <img
+                            :src="variant.main_image"
+                            :alt="`${variant.size} ${variant.color}`"
+                            class="w-full h-full object-cover"
+                          />
+                        </div>
+                      </td>
                       <td class="p-2">{{ variant.size }}</td>
                       <td class="p-2">{{ variant.color || 'N/A' }}</td>
                       <td class="p-2">
@@ -192,6 +191,10 @@ const selectImage = (index) => {
                       <td class="p-2">{{ variant.sku || 'N/A' }}</td>
                       <td class="p-2">
                         {{ variant.price_adjustment ? `$${variant.price_adjustment}` : 'None' }}
+                      </td>
+                      <td class="p-2">
+                        <Badge v-if="variant.is_default" variant="secondary">Default</Badge>
+                        <span v-else class="text-muted-foreground">-</span>
                       </td>
                       <td class="p-2">
                         <Badge :variant="variant.is_active ? 'default' : 'secondary'">

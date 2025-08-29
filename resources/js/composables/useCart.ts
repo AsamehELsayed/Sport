@@ -8,12 +8,15 @@ export interface CartItem {
   originalPrice?: number
   image: string
   size: string
+  color: string
+  variantId?: number
   quantity: number
   inStock: boolean
   stockQuantity: number
   rating: number
   reviews: number
   category: string
+  brand?: string
 }
 
 export interface SavedItem extends Omit<CartItem, 'quantity'> {
@@ -97,7 +100,9 @@ const canCheckout = computed(() => {
 // Methods
 const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
   const existingItem = cartItems.value.find(cartItem =>
-    cartItem.id === item.id && cartItem.size === item.size
+    cartItem.id === item.id &&
+    cartItem.size === item.size &&
+    cartItem.color === item.color
   )
 
   if (existingItem) {
@@ -110,44 +115,56 @@ const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
   }
 }
 
-const updateQuantity = (itemId: number, size: string, newQuantity: number) => {
-  const item = cartItems.value.find(item => item.id === itemId && item.size === size)
+const updateQuantity = (itemId: number, size: string, color: string, newQuantity: number) => {
+  const item = cartItems.value.find(item =>
+    item.id === itemId &&
+    item.size === size &&
+    item.color === color
+  )
   if (item) {
     if (newQuantity <= 0) {
-      removeFromCart(itemId, size)
+      removeFromCart(itemId, size, color)
     } else if (newQuantity <= item.stockQuantity) {
       item.quantity = newQuantity
     }
   }
 }
 
-const removeFromCart = (itemId: number, size: string) => {
+const removeFromCart = (itemId: number, size: string, color: string) => {
   cartItems.value = cartItems.value.filter(item =>
-    !(item.id === itemId && item.size === size)
+    !(item.id === itemId && item.size === size && item.color === color)
   )
 }
 
-const moveToSaved = (itemId: number, size: string) => {
-  const item = cartItems.value.find(item => item.id === itemId && item.size === size)
+const moveToSaved = (itemId: number, size: string, color: string) => {
+  const item = cartItems.value.find(item =>
+    item.id === itemId &&
+    item.size === size &&
+    item.color === color
+  )
   if (item) {
     const { quantity, ...savedItem } = item
     savedItems.value.push({ ...savedItem, quantity: 1 })
-    removeFromCart(itemId, size)
+    removeFromCart(itemId, size, color)
   }
 }
 
-const moveToCart = (itemId: number, size: string) => {
-  const item = savedItems.value.find(item => item.id === itemId && item.size === size)
+const moveToCart = (itemId: number, size: string, color: string) => {
+  const item = savedItems.value.find(item =>
+    item.id === itemId &&
+    item.size === size &&
+    item.color === color
+  )
   if (item) {
     const { quantity, ...cartItem } = item
     addToCart(cartItem, 1)
-    removeFromSaved(itemId, size)
+    removeFromSaved(itemId, size, color)
   }
 }
 
-const removeFromSaved = (itemId: number, size: string) => {
+const removeFromSaved = (itemId: number, size: string, color: string) => {
   savedItems.value = savedItems.value.filter(item =>
-    !(item.id === itemId && item.size === size)
+    !(item.id === itemId && item.size === size && item.color === color)
   )
 }
 

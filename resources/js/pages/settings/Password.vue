@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import SettingsLayout from '@/layouts/admin/SettingsLayout.vue';
 import { Form, Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -14,7 +14,7 @@ import { type BreadcrumbItem } from '@/types';
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Password settings',
-        href: '/settings/password',
+        href: '/admin/settings/password',
     },
 ];
 
@@ -23,7 +23,7 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
+    <AdminLayout>
         <Head title="Password settings" />
 
         <SettingsLayout>
@@ -32,7 +32,7 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
 
                 <Form
                     method="put"
-                    :action="route('password.update')"
+                    :action="route('admin.settings.password.update')"
                     :options="{
                         preserveScroll: true,
                     }"
@@ -97,5 +97,5 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
                 </Form>
             </div>
         </SettingsLayout>
-    </AppLayout>
+    </AdminLayout>
 </template>
